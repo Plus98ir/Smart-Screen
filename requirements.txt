@@ -1,0 +1,7 @@
+pyserial>=3.5
+psutil>=7.0
+Pillow>=11.0
+numpy>=2.0
+PyYAML>=6.0
+pystray>=0.19.5
+pythonnet>=3.0.5; sys_platform == "win32"

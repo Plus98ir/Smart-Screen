@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart-Screen — 3.5" USB system monitor for Windows</title>
+<meta name="description" content="Modern replacement for the UsbMonitor app of 3.5-inch USB system-monitor screens (Turing Smart Screen rev A and clones). 4 pages, 6 themes, landscape and portrait.">
+<meta property="og:title" content="Smart-Screen">
+<meta property="og:description" content="Modern replacement for the UsbMonitor app of 3.5-inch USB system-monitor screens.">
+<meta property="og:image" content="screenshots/carbon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='6' y='12' width='52' height='36' rx='6' fill='%23101418' stroke='%23ff8a3d' stroke-width='4'/%3E%3Cpath d='M14 38l9-10 7 6 9-12 11 16' fill='none' stroke='%2345c4ff' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Crect x='24' y='52' width='16' height='4' rx='2' fill='%23ff8a3d'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Vazirmatn:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d11;--bg2:#12151b;--card:#161a21;--line:#252b35;--text:#e8ecf2;--muted:#9aa4b2;
+  --accent:#ff8a3d;--accent2:#45c4ff;--good:#8be04e;--radius:16px;
+  --font:"Inter",system-ui,sans-serif;
+}
+html[lang=fa]{--font:"Vazirmatn","Inter",system-ui,sans-serif}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.65;-webkit-font-smoothing:antialiased}
+a{color:var(--accent2);text-decoration:none}
+a:hover{text-decoration:underline}
+code{font-family:"JetBrains Mono",monospace;font-size:.88em;background:#1d222b;border:1px solid var(--line);padding:.1em .4em;border-radius:6px;direction:ltr;unicode-bidi:embed}
+.wrap{max-width:1680px;margin:0 auto;padding:0 clamp(16px,3vw,48px)}
+img{max-width:100%;display:block}
+
+/* language: only one is visible */
+html[lang=en] [lang=fa], html[lang=fa] [lang=en]{display:none !important}
+
+header.top{position:sticky;top:0;z-index:10;background:rgba(11,13,17,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;gap:16px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.1rem;color:var(--text)}
+.brand svg{width:30px;height:30px}
+nav.links{display:flex;gap:22px;margin-inline-start:auto}
+nav.links a{color:var(--muted);font-weight:600;font-size:.95rem}
+nav.links a:hover{color:var(--text);text-decoration:none}
+.lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.lang button{background:none;border:0;color:var(--muted);font:600 .85rem var(--font);padding:6px 14px;cursor:pointer}
+.lang button.on{background:var(--accent);color:#111}
+@media (max-width:820px){nav.links{display:none}.lang{margin-inline-start:auto}}
+
+.hero{padding:clamp(40px,7vw,96px) 0 40px;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(24px,4vw,64px);align-items:center}
+.hero h1{font-size:clamp(2.2rem,4.6vw,4rem);line-height:1.1;margin:0 0 18px;font-weight:800;letter-spacing:-.02em}
+.hero h1 span{background:linear-gradient(90deg,var(--accent),#ffc34d);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.lead{color:var(--muted);font-size:clamp(1.02rem,1.3vw,1.2rem);margin:0 0 28px}
+.btns{display:flex;flex-wrap:wrap;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:12px;font-weight:700;border:1px solid var(--line);color:var(--text);background:var(--card)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#111}
+.btn:hover{text-decoration:none;filter:brightness(1.1)}
+.device{background:linear-gradient(145deg,#2a2f38,#0f1216);padding:14px;border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px #2c323c inset}
+.device img{border-radius:8px;width:100%;image-rendering:auto}
+.device-label{color:var(--muted);font-size:.85rem;text-align:center;margin-top:10px}
+@media (max-width:900px){.hero{grid-template-columns:1fr}}
+
+section{padding:56px 0;border-top:1px solid var(--line)}
+section h2{font-size:clamp(1.6rem,2.4vw,2.2rem);margin:0 0 8px;font-weight:800}
+section .sub{color:var(--muted);margin:0 0 28px;max-width:900px}
+
+.compat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+@media (max-width:1000px){.compat{grid-template-columns:1fr}}
+.ccard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;position:relative}
+.ccard.yes{border-top:3px solid var(--good)}
+.ccard.no{border-top:3px solid #e5534b}
+.ccard h3{margin:0 0 6px;font-size:1.1rem}
+.ccard .tag{display:inline-block;font-size:.75rem;font-weight:700;padding:2px 10px;border-radius:999px;margin-bottom:10px}
+.yes .tag{background:rgba(139,224,78,.14);color:var(--good)}
+.no .tag{background:rgba(229,83,75,.14);color:#ff7b72}
+.ccard ul{margin:8px 0 0;padding-inline-start:20px;color:var(--muted)}
+.ccard li{margin:4px 0}
+.req{margin-top:18px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+@media (max-width:1000px){.req{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.req{grid-template-columns:1fr}}
+.req div{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 18px;color:var(--muted)}
+.req b{color:var(--text);display:block}
+
+.feats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+@media (max-width:1150px){.feats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:850px){.feats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.feats{grid-template-columns:1fr}}
+.feat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+.feat .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:rgba(255,138,61,.12);color:var(--accent);margin-bottom:12px}
+.feat .ic svg{width:22px;height:22px}
+.feat h3{margin:0 0 6px;font-size:1.05rem}
+.feat p{margin:0;color:var(--muted);font-size:.95rem}
+
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.tabs button{background:var(--card);border:1px solid var(--line);color:var(--muted);font:600 .92rem var(--font);padding:8px 16px;border-radius:999px;cursor:pointer}
+.tabs button.on{background:var(--text);color:#111;border-color:var(--text)}
+.tabs .sep{width:1px;background:var(--line);margin:0 6px}
+.shot{background:#202228;border:1px solid var(--line);border-radius:var(--radius);padding:10px;overflow-x:auto}
+.shot img{min-width:900px;width:100%;border-radius:6px}
+.shot.portrait img{min-width:700px}
+.shot-note{color:var(--muted);font-size:.85rem;margin-top:10px}
+.themes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:28px}
+@media (min-width:1900px){.themes{grid-template-columns:repeat(6,minmax(0,1fr))}}
+@media (max-width:850px){.themes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.themes{grid-template-columns:1fr}}
+.themes figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;cursor:pointer;transition:border-color .2s}
+.themes figure:hover,.themes figure.on{border-color:var(--accent)}
+.themes img{border-radius:6px;width:100%}
+.themes figcaption{padding:8px 4px 2px;font-weight:600;display:flex;justify-content:space-between;gap:8px}
+.themes figcaption small{color:var(--muted);font-weight:400}
+
+.steps{counter-reset:s;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+@media (max-width:1000px){.steps{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:30px}}
+@media (max-width:560px){.steps{grid-template-columns:1fr}}
+.step{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 22px 22px 22px;position:relative}
+.step::before{counter-increment:s;content:counter(s);position:absolute;top:-14px;inset-inline-start:18px;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#111;font-weight:800;display:grid;place-items:center}
+.step h3{margin:8px 0 6px;font-size:1.05rem}
+.step p{margin:0;color:var(--muted);font-size:.95rem}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;margin-top:28px;align-items:start}
+@media (max-width:1000px){.two{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;font-size:.95rem}
+th,td{text-align:start;padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--bg2);color:var(--muted);font-weight:600}
+tr:last-child td{border-bottom:0}
+.settings img{border-radius:12px;border:1px solid var(--line)}
+
+footer{border-top:1px solid var(--line);padding:32px 0 48px;color:var(--muted);font-size:.9rem}
+footer .wrap{display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-between}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="6" y="12" width="52" height="36" rx="6" fill="#101418" stroke="#ff8a3d" stroke-width="4"/><path d="M14 38l9-10 7 6 9-12 11 16" fill="none" stroke="#45c4ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="24" y="52" width="16" height="4" rx="2" fill="#ff8a3d"/></svg>
+      Smart-Screen
+    </a>
+    <nav class="links">
+      <a href="#screens"><span lang="en">Supported screens</span><span lang="fa">نمایشگرها</span></a>
+      <a href="#features"><span lang="en">Features</span><span lang="fa">امکانات</span></a>
+      <a href="#gallery"><span lang="en">Screenshots</span><span lang="fa">تصاویر</span></a>
+      <a href="#install"><span lang="en">Install</span><span lang="fa">نصب</span></a>
+      <a href="https://github.com/Plus98ir/Smart-Screen">GitHub</a>
+    </nav>
+    <div class="lang" role="group" aria-label="Language">
+      <button data-l="en">EN</button><button data-l="fa">فا</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <div>
+      <h1 lang="en">Your 3.5" USB screen, <span>finally good-looking.</span></h1>
+      <h1 lang="fa">نمایشگر ۳٫۵ اینچی USB شما، <span>بالاخره زیبا.</span></h1>
+      <p class="lead" lang="en">Smart-Screen replaces the vendor <b>UsbMonitor</b> app of 3.5" USB system-monitor screens (Turing Smart Screen rev A and its clones). CPU, GPU, RAM, temperatures, network, VPN, drives, clock with Jalali date and weather, in 6 themes, landscape or portrait.</p>
+      <p class="lead" lang="fa">Smart-Screen جایگزین برنامهٔ <b>UsbMonitor</b> سازندهٔ نمایشگرهای ۳٫۵ اینچی USB مانیتورینگ سیستم است (Turing Smart Screen نسخهٔ rev A و مشابه‌ها). CPU، کارت گرافیک، رم، دما، شبکه، VPN، درایوها، ساعت با تاریخ شمسی و آب‌وهوا؛ در ۶ تم، افقی یا عمودی.</p>
+      <div class="btns">
+        <a class="btn primary" href="https://github.com/Plus98ir/Smart-Screen/archive/refs/heads/main.zip">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
+          <span lang="en">Download ZIP</span><span lang="fa">دانلود ZIP</span>
+        </a>
+        <a class="btn" href="https://github.com/Plus98ir/Smart-Screen">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 00-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.9 1.2 1.9 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 016 0C17.3 4.7 18.3 5 18.3 5c.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0012 .5z"/></svg>
+          <span lang="en">Source on GitHub</span><span lang="fa">سورس در گیت‌هاب</span>
+        </a>
+      </div>
+    </div>
+    <div>
+      <div class="device"><img id="heroImg" src="screenshots/carbon.png" alt="Smart-Screen on a 3.5 inch screen" width="480" height="320"></div>
+      <div class="device-label" lang="en">Real output of the app, 480×320 (theme Carbon)</div>
+      <div class="device-label" lang="fa">خروجی واقعی برنامه، 480×320 (تم Carbon)</div>
+    </div>
+  </div>
+
+  <!-- ======================= SCREENS ======================= -->
+  <section id="screens">
+    <h2 lang="en">Which screens is it for?</h2>
+    <h2 lang="fa">مخصوص چه نمایشگرهایی است؟</h2>
+    <p class="sub" lang="en">Smart-Screen speaks the <b>rev A serial protocol</b> (USB CDC, 115200 baud). Screens with that protocol are found automatically by USB ID or serial number.</p>
+    <p class="sub" lang="fa">Smart-Screen با <b>پروتکل سریال rev A</b> (USB CDC، سرعت 115200) کار می‌کند. نمایشگرهایی که این پروتکل را دارند خودکار با شناسهٔ USB یا شمارهٔ سریال پیدا می‌شوند.</p>
+    <div class="compat">
+      <div class="ccard yes">
+        <span class="tag"><span lang="en">Supported</span><span lang="fa">پشتیبانی می‌شود</span></span>
+        <h3>Turing Smart Screen 3.5" (rev A)</h3>
+        <ul>
+          <li lang="en">The original 3.5" model, 320×480 IPS</li>
+          <li lang="fa">مدل اصلی ۳٫۵ اینچی، IPS با رزولوشن 320×480</li>
+          <li lang="en">Device Manager: <code>VID_1A86&amp;PID_5722</code></li>
+          <li lang="fa">در Device Manager: <code>VID_1A86&amp;PID_5722</code></li>
+        </ul>
+      </div>
+      <div class="ccard yes">
+        <span class="tag"><span lang="en">Supported</span><span lang="fa">پشتیبانی می‌شود</span></span>
+        <h3 lang="en">3.5" "UsbMonitor" / "UsbPCMonitor" IPS screens</h3>
+        <h3 lang="fa">نمایشگرهای ۳٫۵ اینچی «UsbMonitor» / «UsbPCMonitor»</h3>
+        <ul>
+          <li lang="en">AliExpress / Amazon clones sold as "3.5 inch IPS USB-C computer monitor / AIDA64 sub-screen"</li>
+          <li lang="fa">مدل‌های علی‌اکسپرس و آمازون با نام «3.5 inch IPS USB-C computer monitor / AIDA64 sub-screen»</li>
+          <li lang="en">Came with the <b>UsbMonitor.exe</b> app; USB serial <code>USB35INCHIPSV2</code></li>
+          <li lang="fa">همراهش برنامهٔ <b>UsbMonitor.exe</b> آمده؛ سریال USB: <code>USB35INCHIPSV2</code></li>
+        </ul>
+      </div>
+      <div class="ccard no">
+        <span class="tag"><span lang="en">Not supported</span><span lang="fa">پشتیبانی نمی‌شود</span></span>
+        <h3 lang="en">Other protocols</h3>
+        <h3 lang="fa">پروتکل‌های دیگر</h3>
+        <ul>
+          <li lang="en">Turing 2.1" / 5" / 8.8" (rev C)</li>
+          <li lang="fa">Turing مدل‌های ۲٫۱، ۵ و ۸٫۸ اینچ (rev C)</li>
+          <li lang="en">XuanFang 3.5" (rev B), Kipye / WeAct (rev D)</li>
+          <li lang="fa">XuanFang سه‌ونیم اینچ (rev B)، Kipye و WeAct (rev D)</li>
+          <li lang="en">Use <a href="https://github.com/mathoudebine/turing-smart-screen-python">turing-smart-screen-python</a> for these</li>
+          <li lang="fa">برای این‌ها از <a href="https://github.com/mathoudebine/turing-smart-screen-python">turing-smart-screen-python</a> استفاده کنید</li>
+        </ul>
+      </div>
+    </div>
+    <div class="req">
+      <div><b lang="en">Computer</b><b lang="fa">کامپیوتر</b><span lang="en">Windows 10 / 11, 64-bit</span><span lang="fa">ویندوز ۱۰ یا ۱۱، ۶۴ بیتی</span></div>
+      <div><b>Python</b><span lang="en">3.10+ (installed by the installer if missing)</span><span lang="fa">3.10 به بالا (اگر نباشد نصب‌کننده نصبش می‌کند)</span></div>
+      <div><b lang="en">One app at a time</b><b lang="fa">فقط یک برنامه</b><span lang="en">Close UsbMonitor.exe; the COM port is exclusive</span><span lang="fa">UsbMonitor.exe را ببندید؛ پورت COM فقط دست یک برنامه است</span></div>
+      <div><b lang="en">Not sure which one you have?</b><b lang="fa">مطمئن نیستید مدل شما کدام است؟</b><span lang="en">If it came with UsbMonitor.exe and is 3.5", it is supported</span><span lang="fa">اگر ۳٫۵ اینچ است و با UsbMonitor.exe آمده، پشتیبانی می‌شود</span></div>
+    </div>
+  </section>
+
+  <!-- ======================= FEATURES ======================= -->
+  <section id="features">
+    <h2 lang="en">Features</h2>
+    <h2 lang="fa">امکانات</h2>
+    <p class="sub" lang="en">Everything you can see on the screen, and everything you can change from the tray icon.</p>
+    <p class="sub" lang="fa">هر چیزی که روی نمایشگر می‌بینید و هر چیزی که از آیکون کنار ساعت ویندوز قابل تغییر است.</p>
+    <div class="feats">
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 1v4M15 1v4M9 19v4M15 19v4M1 9h4M1 15h4M19 9h4M19 15h4"/></svg></div>
+        <h3 lang="en">System page</h3><h3 lang="fa">صفحهٔ System</h3>
+        <p lang="en">CPU, GPU and RAM gauges, temperatures, clocks, power draw, load graph, network speed and ping.</p>
+        <p lang="fa">گیج CPU، کارت گرافیک و رم، دما، فرکانس، توان مصرفی، نمودار بار، سرعت شبکه و پینگ.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v14m0 0l-5-5m5 5l5-5"/><path d="M4 21h16"/></svg></div>
+        <h3 lang="en">Network page</h3><h3 lang="fa">صفحهٔ Network</h3>
+        <p lang="en">Download / upload graph, VPN on/off, public IP and country, HTTP latency to several targets or your own server, traffic since boot.</p>
+        <p lang="fa">نمودار دانلود و آپلود، روشن/خاموش بودن VPN، IP عمومی و کشور، تأخیر HTTP به چند مقصد یا سرور خودتان، ترافیک از زمان روشن شدن.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></div>
+        <h3 lang="en">Storage page</h3><h3 lang="fa">صفحهٔ Storage</h3>
+        <p lang="en">Every drive with a fill bar, disk read / write speed, top apps by CPU and uptime.</p>
+        <p lang="fa">همهٔ درایوها با نوار پرشدگی، سرعت خواندن و نوشتن دیسک، پرمصرف‌ترین برنامه‌ها و مدت روشن بودن.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+        <h3 lang="en">Clock page</h3><h3 lang="fa">صفحهٔ Clock</h3>
+        <p lang="en">Big clock, Gregorian and Jalali (Persian) date as text or numbers, weather with a 3-day forecast (Open-Meteo, no API key).</p>
+        <p lang="fa">ساعت بزرگ، تاریخ میلادی و شمسی به‌صورت متن یا عدد، آب‌وهوا با پیش‌بینی ۳ روزه (Open-Meteo، بدون کلید API).</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 000 18z" fill="currentColor"/></svg></div>
+        <h3 lang="en">6 themes</h3><h3 lang="fa">۶ تم</h3>
+        <p lang="en">Midnight, Neon (glow), Ember, Frost (light), plus Aurora and Carbon with textured backgrounds that hide LCD ghosting.</p>
+        <p lang="fa">Midnight، Neon (درخشان)، Ember، Frost (روشن)، و Aurora و Carbon با پس‌زمینهٔ بافت‌دار که سایهٔ تصویر ماندگار LCD را می‌پوشانند.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        <h3 lang="en">Rotate, flip, mirror</h3><h3 lang="fa">چرخش، وارونه، آینه</h3>
+        <p lang="en">Landscape or portrait, Flip 180° for screens mounted upside down, horizontal / vertical mirror for screens seen through glass.</p>
+        <p lang="fa">افقی یا عمودی، چرخش ۱۸۰ درجه برای نمایشگر وارونه، آینهٔ افقی / عمودی برای نمایشگری که از پشت شیشه دیده می‌شود.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V5h16v2M9 19h6M12 5v14"/></svg></div>
+        <h3 lang="en">Text size</h3><h3 lang="fa">اندازهٔ متن</h3>
+        <p lang="en">Normal, large or extra large. Values shrink to fit their card instead of overflowing.</p>
+        <p lang="fa">معمولی، بزرگ یا خیلی بزرگ. عددها به‌جای بیرون زدن از کارت، کوچک می‌شوند تا جا شوند.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 13A9 9 0 1111 3a7 7 0 0010 10z"/></svg></div>
+        <h3 lang="en">Brightness &amp; night mode</h3><h3 lang="fa">روشنایی و حالت شب</h3>
+        <p lang="en">Set brightness, dim automatically between two times, or turn the screen off from the tray.</p>
+        <p lang="fa">تنظیم روشنایی، کم‌نور شدن خودکار بین دو ساعت، یا خاموش کردن نمایشگر از منوی آیکون.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></div>
+        <h3 lang="en">Fast partial updates</h3><h3 lang="fa">به‌روزرسانی سریع و جزئی</h3>
+        <p lang="en">One frame per second, only the changed parts are sent over USB, plus a periodic full redraw to keep it clean.</p>
+        <p lang="fa">هر ثانیه یک فریم؛ فقط بخش‌های تغییرکرده از USB فرستاده می‌شوند، با بازکشی کامل دوره‌ای برای تمیز ماندن تصویر.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.8V4a2 2 0 10-4 0v10.8a4 4 0 104 0z"/></svg></div>
+        <h3 lang="en">Real temperatures</h3><h3 lang="fa">دمای واقعی</h3>
+        <p lang="en">LibreHardwareMonitor for CPU, GPU and drives (Intel and AMD), with nvidia-smi as a fallback for NVIDIA cards.</p>
+        <p lang="fa">LibreHardwareMonitor برای CPU، کارت گرافیک و دیسک‌ها (اینتل و AMD) و nvidia-smi به‌عنوان پشتیبان برای کارت‌های NVIDIA.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg></div>
+        <h3 lang="en">VPN-aware ping</h3><h3 lang="fa">پینگ درست با VPN</h3>
+        <p lang="en">Latency is an HTTP round trip on an open connection, so TUN-mode VPNs (v2rayN, sing-box, Clash…) can't fake a 1 ms ping.</p>
+        <p lang="fa">تأخیر به‌صورت رفت‌وبرگشت HTTP روی اتصال باز اندازه گرفته می‌شود تا VPNهای حالت TUN (v2rayN، sing-box، Clash و…) پینگ ۱ میلی‌ثانیه‌ای الکی نشان ندهند.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8"/></svg></div>
+        <h3 lang="en">Tray icon + Settings</h3><h3 lang="fa">آیکون و پنجرهٔ تنظیمات</h3>
+        <p lang="en">Quick switches in the tray menu; a Settings window with live preview that sends nothing to the screen until you press Apply. Starts with Windows.</p>
+        <p lang="fa">تغییرات سریع از منوی آیکون؛ پنجرهٔ تنظیمات با پیش‌نمایش زنده که تا Apply نزنید چیزی به نمایشگر نمی‌فرستد. همراه ویندوز اجرا می‌شود.</p></div>
+    </div>
+  </section>
+
+  <!-- ======================= GALLERY ======================= -->
+  <section id="gallery">
+    <h2 lang="en">Screenshots</h2>
+    <h2 lang="fa">تصاویر</h2>
+    <p class="sub" lang="en">All four pages, rendered by the app itself with sample data. Pick a theme and orientation.</p>
+    <p class="sub" lang="fa">هر چهار صفحه که خود برنامه با داده‌های نمونه کشیده است. تم و جهت را انتخاب کنید.</p>
+    <div class="tabs" id="orientTabs">
+      <button data-o="landscape" class="on"><span lang="en">Landscape 480×320</span><span lang="fa">افقی 480×320</span></button>
+      <button data-o="portrait"><span lang="en">Portrait 320×480</span><span lang="fa">عمودی 320×480</span></button>
+    </div>
+    <div class="shot" id="shotBox"><img id="sheet" src="screenshots/carbon-landscape.png" alt="All pages"></div>
+    <div class="shot-note" lang="en">Pages: System · Network · Storage · Clock. Scroll sideways on small screens.</div>
+    <div class="shot-note" lang="fa">صفحه‌ها: System · Network · Storage · Clock. در صفحه‌های کوچک به پهلو اسکرول کنید.</div>
+    <div class="themes" id="themes"></div>
+  </section>
+
+  <!-- ======================= INSTALL ======================= -->
+  <section id="install">
+    <h2 lang="en">Install</h2>
+    <h2 lang="fa">نصب</h2>
+    <p class="sub" lang="en">About two minutes. The installer can be run again at any time to update.</p>
+    <p class="sub" lang="fa">حدود دو دقیقه. نصب‌کننده را هر وقت خواستید برای به‌روزرسانی دوباره اجرا کنید.</p>
+    <div class="steps">
+      <div class="step"><h3 lang="en">Download</h3><h3 lang="fa">دانلود</h3>
+        <p lang="en"><a href="https://github.com/Plus98ir/Smart-Screen/archive/refs/heads/main.zip">Download the ZIP</a> and extract it to a permanent folder, e.g. <code>Documents\Smart-Screen</code>.</p>
+        <p lang="fa"><a href="https://github.com/Plus98ir/Smart-Screen/archive/refs/heads/main.zip">فایل ZIP را دانلود</a> و در یک پوشهٔ دائمی باز کنید، مثلاً <code>Documents\Smart-Screen</code>.</p></div>
+      <div class="step"><h3 lang="en">Close the old app</h3><h3 lang="fa">بستن برنامهٔ قبلی</h3>
+        <p lang="en">Plug in the screen and close <b>UsbMonitor.exe</b>. The installer also offers to turn off its autostart.</p>
+        <p lang="fa">نمایشگر را وصل کنید و <b>UsbMonitor.exe</b> را ببندید. نصب‌کننده هم پیشنهاد می‌دهد اجرای خودکارش خاموش شود.</p></div>
+      <div class="step"><h3 lang="en">Run install.bat</h3><h3 lang="fa">اجرای install.bat</h3>
+        <p lang="en">Accept the admin prompt. It sets up Python + packages, the PawnIO temperature driver and a "Smart-Screen" autostart task.</p>
+        <p lang="fa">اجازهٔ ادمین بدهید. پایتون و پکیج‌ها، درایور دمای PawnIO و تسک اجرای خودکار «Smart-Screen» را آماده می‌کند.</p></div>
+      <div class="step"><h3 lang="en">Customise</h3><h3 lang="fa">شخصی‌سازی</h3>
+        <p lang="en">Right-click the tray icon → <b>Settings…</b> for theme, orientation, pages, weather city and your own latency server.</p>
+        <p lang="fa">روی آیکون کنار ساعت ویندوز راست‌کلیک ← <b>Settings…</b> برای تم، جهت، صفحه‌ها، شهر آب‌وهوا و سرور پینگ خودتان.</p></div>
+    </div>
+
+    <div class="two">
+      <div class="settings">
+        <img src="screenshots/settings.png" alt="Settings window" loading="lazy">
+        <div class="shot-note" lang="en">Settings window with live preview.</div>
+        <div class="shot-note" lang="fa">پنجرهٔ تنظیمات با پیش‌نمایش زنده.</div>
+      </div>
+      <div>
+        <table>
+          <thead><tr><th lang="en">File</th><th lang="fa">فایل</th><th lang="en">What it does</th><th lang="fa">کارش</th></tr></thead>
+          <tbody>
+            <tr><td><code>install.bat</code></td><td><span lang="en">Install or update (safe to run again)</span><span lang="fa">نصب یا به‌روزرسانی (اجرای دوباره مشکلی ندارد)</span></td></tr>
+            <tr><td><code>start.bat</code> / <code>stop.bat</code></td><td><span lang="en">Start / stop the background app</span><span lang="fa">اجرا / توقف برنامه در پس‌زمینه</span></td></tr>
+            <tr><td><code>run-console.bat</code></td><td><span lang="en">Run in a console to see errors</span><span lang="fa">اجرا در کنسول برای دیدن خطاها</span></td></tr>
+            <tr><td><code>uninstall.bat</code></td><td><span lang="en">Remove the autostart task (files stay)</span><span lang="fa">حذف تسک اجرای خودکار (فایل‌ها می‌مانند)</span></td></tr>
+            <tr><td><code>config.yaml</code></td><td><span lang="en">All settings; reloads by itself when changed</span><span lang="fa">همهٔ تنظیمات؛ با تغییر خودکار دوباره خوانده می‌شود</span></td></tr>
+          </tbody>
+        </table>
+        <h3 style="margin:28px 0 10px" lang="en">Troubleshooting</h3>
+        <h3 style="margin:28px 0 10px" lang="fa">رفع مشکل</h3>
+        <table>
+          <tbody>
+            <tr><td><span lang="en">"Screen not found"</span><span lang="fa">«Screen not found»</span></td><td><span lang="en">Close UsbMonitor.exe, replug the cable, or pick the COM port in Settings.</span><span lang="fa">UsbMonitor.exe را ببندید، کابل را جدا و وصل کنید، یا پورت COM را در تنظیمات انتخاب کنید.</span></td></tr>
+            <tr><td><span lang="en">No CPU temperature</span><span lang="fa">دمای CPU خالی است</span></td><td><span lang="en">Start with start.bat (admin task) and run install.bat again for PawnIO.</span><span lang="fa">با start.bat اجرا کنید (تسک ادمین) و برای PawnIO دوباره install.bat را اجرا کنید.</span></td></tr>
+            <tr><td><span lang="en">Upside down</span><span lang="fa">تصویر وارونه است</span></td><td><span lang="en">Tray → Rotate / Flip → Flip 180°.</span><span lang="fa">منوی آیکون ← Rotate / Flip ← Flip 180°.</span></td></tr>
+            <tr><td><span lang="en">Old image shows through</span><span lang="fa">تصویر قبلی کم‌رنگ دیده می‌شود</span></td><td><span lang="en">LCD retention: tray → Clear ghost image, or use Aurora / Carbon.</span><span lang="fa">تصویر ماندگار LCD: منوی آیکون ← Clear ghost image، یا تم Aurora / Carbon.</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <span lang="en">Smart-Screen · GNU GPL v3 · screen driver from</span>
+      <span lang="fa">Smart-Screen · مجوز GNU GPL v3 · درایور نمایشگر از</span>
+      <a href="https://github.com/mathoudebine/turing-smart-screen-python">turing-smart-screen-python</a>,
+      <span lang="en">sensors by</span><span lang="fa">حسگرها با</span>
+      <a href="https://github.com/LibreHardwareMonitor/LibreHardwareMonitor">LibreHardwareMonitor</a>,
+      <span lang="en">weather by</span><span lang="fa">آب‌وهوا از</span>
+      <a href="https://open-meteo.com/">Open-Meteo</a>
+    </div>
+    <div><a href="https://github.com/Plus98ir/Smart-Screen">github.com/Plus98ir/Smart-Screen</a></div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var THEMES = [
+    ["carbon", "Carbon", {en: "hides ghosting", fa: "پوشاندن سایه"}],
+    ["aurora", "Aurora", {en: "hides ghosting", fa: "پوشاندن سایه"}],
+    ["midnight", "Midnight", {en: "dark", fa: "تیره"}],
+    ["neon", "Neon", {en: "glow", fa: "درخشان"}],
+    ["ember", "Ember", {en: "warm", fa: "گرم"}],
+    ["frost", "Frost", {en: "light", fa: "روشن"}]
+  ];
+  var state = {theme: "carbon", orient: "landscape", lang: "en"};
+  var q = (location.search.match(/[?&]lang=(en|fa)/) || [])[1];
+  try { state.lang = q || localStorage.getItem("ss-lang") ||((navigator.language || "").indexOf("fa") === 0 ? "fa" : "en"); } catch (e) {}
+
+  var grid = document.getElementById("themes");
+  THEMES.forEach(function (t) {
+    var f = document.createElement("figure");
+    f.dataset.t = t[0];
+    f.innerHTML = '<img src="screenshots/' + t[0] + '.png" alt="' + t[1] + '" loading="lazy" width="480" height="320">' +
+      '<figcaption>' + t[1] + ' <small><span lang="en">' + t[2].en + '</span><span lang="fa">' + t[2].fa + '</span></small></figcaption>';
+    f.onclick = function () { state.theme = t[0]; render(); };
+    grid.appendChild(f);
+  });
+
+  function render() {
+    var html = document.documentElement;
+    html.lang = state.lang;
+    html.dir = state.lang === "fa" ? "rtl" : "ltr";
+    document.querySelectorAll(".lang button").forEach(function (b) { b.classList.toggle("on", b.dataset.l === state.lang); });
+    document.querySelectorAll("#orientTabs button").forEach(function (b) { b.classList.toggle("on", b.dataset.o === state.orient); });
+    grid.querySelectorAll("figure").forEach(function (f) { f.classList.toggle("on", f.dataset.t === state.theme); });
+    document.getElementById("sheet").src = "screenshots/" + state.theme + "-" + state.orient + ".png";
+    document.getElementById("shotBox").classList.toggle("portrait", state.orient === "portrait");
+  }
+  document.querySelectorAll(".lang button").forEach(function (b) {
+    b.onclick = function () { state.lang = b.dataset.l; try { localStorage.setItem("ss-lang", state.lang); } catch (e) {} render(); };
+  });
+  document.querySelectorAll("#orientTabs button").forEach(function (b) {
+    b.onclick = function () { state.orient = b.dataset.o; render(); };
+  });
+  render();
+})();
+</script>
+</body>
+</html>
