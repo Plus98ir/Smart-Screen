@@ -46,26 +46,47 @@ if ($oldTasks.Count -or $runKeys.Count) {
 
 # ---------------------------------------------------------------- python
 Step "Python"
-$py = $null
-foreach ($cand in @(@("py", "-3"), @("python"))) {
+function Test-Py($cand) {
+    # True if the command runs a real Python 3.10+ (the Microsoft Store "python" alias fails here)
     try {
         $v = & $cand[0] $cand[1..9] -c "import sys; print('%d.%d' % sys.version_info[:2])" 2>$null
-        if ($LASTEXITCODE -eq 0 -and $v -match "^3\.(\d+)$" -and [int]$Matches[1] -ge 10) { $py = $cand; break }
-    } catch { }
+        return ($LASTEXITCODE -eq 0 -and "$v" -match "^3\.(\d+)$" -and [int]$Matches[1] -ge 10)
+    } catch { return $false }
 }
+function Find-Py {
+    $cands = @(@("py", "-3"), @("python"))
+    foreach ($pat in "$env:LOCALAPPDATA\Programs\Python\Python3*\python.exe", "$env:LOCALAPPDATA\Python\pythoncore-3*\python.exe",
+                     "$env:ProgramFiles\Python3*\python.exe") {
+        Get-ChildItem $pat -ErrorAction SilentlyContinue | Sort-Object FullName -Descending | ForEach-Object { $cands += , @($_.FullName) }
+    }
+    foreach ($c in $cands) { if (Test-Py $c) { return , $c } }
+    return $null
+}
+$py = Find-Py
 if (-not $py) {
     Warn "Python 3.10+ not found - installing Python 3.14 with winget..."
-    try { winget install -e --id Python.Python.3.14 --silent --accept-package-agreements --accept-source-agreements }
-    catch { Write-Host "winget failed. Install Python from https://www.python.org/downloads/ and run install.bat again." -ForegroundColor Red; Read-Host "Enter to exit"; exit 1 }
+    $ErrorActionPreference = "Continue"
+    try { winget install -e --id Python.Python.3.14 --source winget --scope machine --silent --accept-package-agreements --accept-source-agreements } catch { }
+    $ErrorActionPreference = "Stop"
     $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
-    $py = @("py", "-3")
+    $py = Find-Py
+    if (-not $py) { Write-Host "Python install failed. Install Python from https://www.python.org/downloads/ (tick 'Add to PATH') and run install.bat again." -ForegroundColor Red; Read-Host "Enter to exit"; exit 1 }
 }
 $pyver = & $py[0] $py[1..9] -c "import sys; print(sys.version.split()[0])"
 Ok "Using Python $pyver"
 
 Step "Virtual environment + packages"
-$venvPy = Join-Path $Dir ".venv\Scripts\python.exe"
-if (-not (Test-Path $venvPy)) { & $py[0] $py[1..9] -m venv (Join-Path $Dir ".venv") }
+$venv = Join-Path $Dir ".venv"
+$venvPy = Join-Path $venv "Scripts\python.exe"
+if ((Test-Path $venv) -and -not (Test-Py @($venvPy))) {
+    # e.g. folder copied from another PC/user: the venv points to a Python that is not here
+    Warn "Existing .venv is broken (its Python is missing) - rebuilding it"
+    Remove-Item -Recurse -Force $venv
+}
+if (-not (Test-Path $venvPy)) {
+    & $py[0] $py[1..9] -m venv $venv
+    if (-not (Test-Py @($venvPy))) { Write-Host "Could not create the virtual environment in $venv." -ForegroundColor Red; Read-Host "Enter to exit"; exit 1 }
+}
 $ErrorActionPreference = "Continue"
 & $venvPy -m pip install --disable-pip-version-check -q --no-index --find-links (Join-Path $Dir "wheels") -r requirements.txt
 if ($LASTEXITCODE -ne 0) {
