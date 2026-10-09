@@ -112,7 +112,7 @@ class SettingsWindow:
         self._combo(f, 1, "Units", ("weather", "units"), ["metric", "imperial"], readonly=True)
         self._entry(f, 2, "CPU name on screen", ("sensors", "cpu_label"), hint="empty = automatic")
         self._entry(f, 3, "GPU name on screen", ("sensors", "gpu_label"), hint="empty = automatic")
-        self._check(f, 4, "Use LibreHardwareMonitor (temps, GPU, fans)", ("sensors", "use_lhm"))
+        self._check(f, 4, "Use LibreHardwareMonitor (temps, GPU)", ("sensors", "use_lhm"))
         ttk.Label(f, text="Changing this needs Restart from the tray menu.", foreground="#666").grid(
             row=5, column=0, columnspan=3, sticky="w")
 

@@ -1,7 +1,7 @@
 """Hardware + system metrics.
 
 psutil gives CPU load, RAM, disks, network, processes on every OS.
-On Windows, LibreHardwareMonitor (via pythonnet) adds temperatures, clocks, power, fans and GPU data.
+On Windows, LibreHardwareMonitor (via pythonnet) adds temperatures, clocks, power and GPU data.
 If LHM is unavailable, nvidia-smi is used as a GPU fallback.
 """
 import collections
@@ -85,8 +85,10 @@ class LHM:
         c.IsCpuEnabled = True
         c.IsGpuEnabled = True
         c.IsMemoryEnabled = False
-        c.IsMotherboardEnabled = True
-        c.IsControllerEnabled = True
+        # Motherboard (Super I/O / EC port reads) and Controller (HID scan) stay off: nothing on the
+        # screen uses them and polling them every second can make the mouse stutter.
+        c.IsMotherboardEnabled = False
+        c.IsControllerEnabled = False
         c.IsNetworkEnabled = False
         c.IsStorageEnabled = False  # SMART reads are slow; drive temps are not shown
         c.IsPsuEnabled = False
@@ -140,15 +142,6 @@ class LHM:
                               and "Core #" in str(x.Name)]
                 out["cpu_clock"] = max(clocks) if clocks else NAN
                 out["cpu_power"] = self._val(s, S.Power, "Package", "CPU Package", "Core (SVI2 TFN)")
-            elif hw.HardwareType == T.Motherboard:
-                hw.Update()
-                fans = []
-                for sub in hw.SubHardware:
-                    sub.Update()
-                    for x in sub.Sensors:
-                        if x.SensorType == S.Fan and x.Value is not None and float(x.Value) > 0:
-                            fans.append((str(x.Name), float(x.Value)))
-                out["fans"] = fans
         g = self.gpu
         if g is not None:
             g.Update()

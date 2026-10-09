@@ -40,7 +40,7 @@ Both are found automatically (by USB ID or serial number). If yours shows up as 
 - **Brightness** and **night dimming** (time window)
 - **Fast**: draws one frame a second and sends only the parts that changed
 - **Tray icon** for everything (theme, page, rotation, brightness, screen off, restart) and a **Settings window with live preview**: nothing reaches the screen until you press Apply
-- **Real temperatures** through LibreHardwareMonitor (CPU, GPU, drives), with `nvidia-smi` as a fallback for NVIDIA cards
+- **Real temperatures** through LibreHardwareMonitor (CPU and GPU), with `nvidia-smi` as a fallback for NVIDIA cards
 - **VPN-aware latency**: measured as an HTTP round trip on an open connection, so TUN-mode VPNs (v2rayN, sing-box, Clash…) can't fake a 1 ms ping
 - **Clear ghost image**: a slow colour cycle at full brightness that helps fade LCD image retention
 - **Starts with Windows** (scheduled task with admin rights, needed for CPU temperatures), no UAC prompt

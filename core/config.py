@@ -50,7 +50,7 @@ DEFAULTS = {
         "units": "metric",           # metric | imperial
     },
     "sensors": {
-        "use_lhm": True,             # LibreHardwareMonitor for temps / GPU / fans (needs admin)
+        "use_lhm": True,             # LibreHardwareMonitor for temps / GPU (needs admin)
         "cpu_label": "",             # override the CPU name shown on screen
         "gpu_label": "",             # override the GPU name shown on screen
     },
