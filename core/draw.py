@@ -273,6 +273,29 @@ class Canvas:
             if glow and self.gd:
                 self.gd.arc(box, start, end, fill=hex2rgb(color), width=int(width * S))
 
+    def arc_gauge(self, cx, cy, r, width, pct, color, track=None, start=135, sweep=270):
+        """Open gauge (gap at the bottom) with round caps."""
+        box = self._r((cx - r, cy - r, cx + r, cy + r))
+        wpx = int(width * S)
+        rr = (r - width / 2) * S
+
+        def caps(a0, a1, col):
+            for ang in (a0, a1):
+                a = math.radians(ang)
+                px, py = cx * S + rr * math.cos(a), cy * S + rr * math.sin(a)
+                cr = width * S / 2
+                self.d.ellipse((px - cr, py - cr, px + cr, py + cr), fill=col)
+
+        tr = hex2rgb(track or self.t["track"])
+        self.d.arc(box, start, start + sweep, fill=tr, width=wpx)
+        caps(start, start + sweep, tr)
+        pct = 0 if pct is None or (isinstance(pct, float) and math.isnan(pct)) else max(0.0, min(100.0, pct))
+        if pct > 0:
+            end = start + sweep * pct / 100
+            col = hex2rgb(color)
+            self.d.arc(box, start, end, fill=col, width=wpx)
+            caps(start, end, col)
+
     def bar(self, x, y, w, h, pct, color, track=None, glow=False):
         r = h * S / 2 if self.t.get("style") != "cut" else 0
         self.d.rounded_rectangle(self._r((x, y, x + w, y + h)), r, fill=hex2rgb(track or self.t["track"]))

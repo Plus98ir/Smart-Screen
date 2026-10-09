@@ -29,7 +29,7 @@ def sample():
     data = {
         "host": "PLUSPC", "cpu_name": "Ryzen 7 5800X", "cpu_load": 34.0, "cpu_temp": 61.0, "cpu_clock": 4475.0,
         "cpu_power": 78.0, "gpu_name": "NVIDIA GeForce RTX 3070", "gpu_short": "RTX 3070", "gpu_load": 72.0,
-        "gpu_temp": 66.0, "gpu_clock": 1905.0, "gpu_mem_used": 5321.0, "gpu_mem_total": 8192.0,
+        "gpu_temp": 66.0, "gpu_clock": 1905.0, "gpu_fan": 1240.0, "gpu_mem_used": 5321.0, "gpu_mem_total": 8192.0,
         "ram_pct": 47.0, "ram_used": 15.1 * 1024 ** 3, "ram_total": 32 * 1024 ** 3,
         "net_down": 4.82 * 1024 ** 2, "net_up": 612 * 1024, "net_total_down": 38.4 * 1024 ** 3,
         "net_total_up": 2.9 * 1024 ** 3, "nic": "Ethernet", "vpn_adapter": "xray_tun",

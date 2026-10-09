@@ -34,7 +34,7 @@ Both are found automatically (by USB ID or serial number). If yours shows up as 
   - **Network**: download / upload graph, VPN status, public IP + country, HTTP latency to several targets (and your own server, optional), traffic since boot
   - **Storage**: every drive with fill bar, disk read / write, top apps by CPU, uptime
   - **Clock**: big clock, Gregorian + Jalali (Persian) date, weather with a 3-day forecast
-- **6 themes**: Midnight, Neon (glow), Ember, Frost (light), Aurora and Carbon (textured backgrounds that hide LCD ghosting / burn-in)
+- **7 themes**: Pulse (one-panel dashboard with arc gauges and sparklines), Midnight, Neon (glow), Ember, Frost (light), Aurora and Carbon (textured backgrounds that hide LCD ghosting / burn-in)
 - **Landscape and portrait**, plus **Flip 180°** and **Mirror** (horizontal / vertical) for screens mounted upside down or seen through glass
 - **Text size**: normal, large, extra large; values shrink to fit instead of overflowing
 - **Brightness** and **night dimming** (time window)
@@ -51,6 +51,7 @@ All 4 pages per theme (rendered by the app itself with sample data):
 
 | Theme | Landscape (480×320) |
 |---|---|
+| Pulse | <img src="docs/screenshots/pulse-landscape.png" width="100%"> |
 | Carbon | <img src="docs/screenshots/carbon-landscape.png" width="100%"> |
 | Aurora | <img src="docs/screenshots/aurora-landscape.png" width="100%"> |
 | Midnight | <img src="docs/screenshots/midnight-landscape.png" width="100%"> |
@@ -104,7 +105,7 @@ main.py          app loop, page rotation, night dimming, tray menu
 settings.py      Settings window (tkinter) with live preview
 core/screen.py   partial updates: changed 16-px bands -> RGB565 -> screen
 core/pages.py    the 4 pages, landscape + portrait layouts
-core/themes.py   the 6 themes
+core/themes.py   the 7 themes
 core/sensors.py  psutil + LibreHardwareMonitor + nvidia-smi
 core/online.py   latency, public IP / country, weather (open-meteo)
 library/lcd/     rev A driver from turing-smart-screen-python

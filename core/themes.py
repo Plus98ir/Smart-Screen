@@ -79,6 +79,20 @@ THEMES = {
         "accent": "#FF8A3D", "clock": "#FFFFFF",
         "style": "soft", "radius": 10, "title_font": "bold", "fill_alpha": 0.32,
     },
+    # one big panel with dividers, open-arc gauges, sparklines and icons on the System page ("layout": "dash")
+    "pulse": {
+        "name": "Pulse",
+        "bg": ("#0A1128", "#05070F"),
+        "card": "#0B1230", "border": "#1E2B5C", "track": "#18224A", "gridline": "#141D40",
+        "text": "#F1F5FF", "sub": "#8E9BC4", "dim": "#4A5684",
+        "cpu": "#2F8BFF", "gpu": "#1FD69A", "ram": "#3BA4FF", "disk": "#4C8DFF",
+        "down": "#2F8BFF", "up": "#A855F7",
+        "ok": "#1FD69A", "warn": "#FBBF24", "bad": "#F87171",
+        "sun": "#FBBF24", "cloud": "#CBD5E1", "rain": "#60A5FA",
+        "accent": "#7C6CFF", "clock": "#FFFFFF", "icon": "#3BA4FF", "temp": "#C084FC",
+        "style": "soft", "radius": 14, "title_font": "bold", "fill_alpha": 0.45,
+        "layout": "dash",
+    },
 }
 
 

@@ -176,9 +176,223 @@ def net_mini(c, x, y, w, h, d, ctx):
         c.text(x + w - 12, yy, "VPN", "bold", 9, t["ok"] if vpn else t["dim"], "rm")
 
 
+# ---------------------------------------------------------------- "dash" layout (Pulse theme)
+def _icon(c, kind, x, y, s, color):
+    """Small line icon in a tinted rounded square, centred on x, y (s = box size)."""
+    t = c.t
+    col = draw.hex2rgb(color)
+    S = draw.S
+    c.d.rounded_rectangle(c._r((x - s / 2, y - s / 2, x + s / 2, y + s / 2)), 5 * S,
+                          fill=draw.mix(t["card"], color, 0.16), outline=draw.mix(t["card"], color, 0.55), width=S)
+    g = s * 0.30  # glyph half size
+    lw = max(1, int(1.5 * S))
+    X, Y = x * S, y * S
+    G = g * S
+    if kind == "ram":
+        c.d.rectangle((X - G, Y - G * 0.55, X + G, Y + G * 0.35), outline=col, width=lw)
+        for i in range(4):
+            px = X - G * 0.7 + i * G * 0.47
+            c.d.line((px, Y + G * 0.35, px, Y + G * 0.8), fill=col, width=lw)
+    elif kind == "vram":
+        c.d.rectangle((X - G, Y - G * 0.75, X + G, Y + G * 0.75), outline=col, width=lw)
+        c.d.line((X - G * 0.6, Y + G * 0.3, X - G * 0.2, Y - G * 0.2, X + G * 0.15, Y + G * 0.15, X + G * 0.6,
+                  Y - G * 0.35), fill=col, width=lw)
+    elif kind == "disk":
+        c.d.rounded_rectangle((X - G * 0.75, Y - G, X + G * 0.75, Y + G), 2 * S, outline=col, width=lw)
+        c.d.line((X - G * 0.4, Y - G * 0.45, X + G * 0.4, Y - G * 0.45), fill=col, width=lw)
+        r = G * 0.18
+        c.d.ellipse((X - r, Y + G * 0.45 - r, X + r, Y + G * 0.45 + r), fill=col)
+    elif kind == "temp":
+        c.d.rounded_rectangle((X - G * 0.25, Y - G, X + G * 0.25, Y + G * 0.35), G * 0.25, outline=col, width=lw)
+        r = G * 0.45
+        c.d.ellipse((X - r, Y + G * 0.55 - r, X + r, Y + G * 0.55 + r), fill=col)
+    elif kind == "fan":
+        # 4 blades: small ellipses around the hub, each pushed out along its angle
+        for a in (20, 110, 200, 290):
+            ra = math.radians(a)
+            bx, by = X + math.cos(ra) * G * 0.5, Y + math.sin(ra) * G * 0.5
+            rb = G * 0.42
+            c.d.ellipse((bx - rb, by - rb, bx + rb, by + rb), fill=col)
+        r = G * 0.2
+        c.d.ellipse((X - r, Y - r, X + r, Y + r), fill=draw.mix(t["card"], color, 0.16))
+    elif kind == "ping":
+        for i, hh in enumerate((0.4, 0.7, 1.0)):
+            px = X - G * 0.7 + i * G * 0.7
+            c.d.line((px, Y + G * 0.8, px, Y + G * 0.8 - G * 1.6 * hh), fill=col, width=lw + S)
+    elif kind in ("down", "up"):
+        top, bot = Y - G, Y + G * 0.45
+        tip, tail = (bot, top) if kind == "down" else (top, bot)
+        c.d.line((X, tail, X, tip), fill=col, width=lw)
+        k = G * 0.55 * (1 if kind == "down" else -1)
+        c.d.line((X - G * 0.55, tip - k, X, tip, X + G * 0.55, tip - k), fill=col, width=lw)
+        c.d.line((X - G * 0.8, Y + G, X + G * 0.8, Y + G), fill=col, width=lw)
+
+
+def _label(c, x, y, full, short, role, size, color, max_w, anchor="lm"):
+    s = full if c.tlen(full, role, size) <= max_w or not short else short
+    return c.text_fit(x, y, s, role, size, color, anchor, max_w=max_w)
+
+
+def _spark(c, x, y, w, h, vals, color, vmax=None, n=48):
+    vals = [v for v in (vals or [])[-n:] if isnum(v)]
+    if len(vals) < 2:
+        return
+    top = vmax or max(max(vals) * 1.15, 1)
+    c.chart(x, y, w, h, [(vals, color, True)], vmax=top, grid=False)
+
+
+def _dash_gauge(c, x, y, w, h, label, name, pct, color, sub, hist_vals):
+    t = c.t
+    c.text(x + 12, y + 14, label, "bold", 14, t["text"], "lm")
+    if name:
+        c.text(x + w - 10, y + 14, c.fit(name, "medium", 9, w - 50), "medium", 9, t["sub"], "rm")
+    spark_h = h * 0.24
+    r = min(w * 0.30, (h - spark_h - 34) / 2 + 2)
+    cx, cy = x + w / 2, y + 28 + r
+    col = load_color(t, pct, color)
+    c.arc_gauge(cx, cy, r, max(6, r * 0.16), pct, col)
+    inner = 2 * r * 0.72
+    big = r * 0.56
+    c.value_unit(cx + 1, cy + big * 0.30, fmt_pct(pct), "%", t["text"], big, anchor="ms", unit_size=big * 0.48,
+                 max_w=inner, role="bold")
+    if sub:
+        c.text_fit(cx, cy + r * 0.5, sub, "medium", 10, t["sub"], "mm", max_w=2 * r * 0.52)
+    _spark(c, x + 10, y + h - spark_h - 8, w - 20, spark_h, hist_vals, color, vmax=100)
+
+
+def _dash_row(c, x, y, w, kind, label, pct, sub, color):
+    """Icon, label + small sub line, percent on the right (one row of the RAM / VRAM / disk list)."""
+    t = c.t
+    _icon(c, kind, x + 13, y, 24, color)
+    vw = c.value_unit(x + w, y - 1, fmt_pct(pct), "%", t["text"], 15, anchor="rs", unit_size=10, role="bold",
+                      max_w=52)
+    c.text(x + 32, y - 7, c.fit(label, "medium", 12, w - 40 - vw), "medium", 12, t["text"], "lm")
+    if sub:
+        c.text(x + 32, y + 9, c.fit(sub, "regular", 10, w - 36), "regular", 10, t["sub"], "lm")
+
+
+def _dash_rows(d, t):
+    def gb(v):
+        return f"{v / 1024 ** 3:.1f}" if v < 100 * 1024 ** 3 else f"{v / 1024 ** 3:.0f}"
+    rows = []
+    if isnum(d.get("ram_total")):
+        rows.append(("ram", "RAM", d.get("ram_pct"), f"{gb(d.get('ram_used', 0))} / {d['ram_total'] / 1024 ** 3:.0f} GB",
+                     t["icon"]))
+    used, total = d.get("gpu_mem_used"), d.get("gpu_mem_total")
+    if isnum(used) and isnum(total) and total:
+        rows.append(("vram", "VRAM", used / total * 100, f"{used / 1024:.1f} / {total / 1024:.0f} GB", t["gpu"]))
+    for dk in d.get("disks") or []:
+        if len(rows) >= 3:
+            break
+        u, uu = fmt_bytes(dk["used"], 0)
+        tot, tu = fmt_bytes(dk["total"], 0)
+        rows.append(("disk", f"Disk {dk['label']}", dk["pct"], f"{u} {uu} / {tot} {tu}" if uu != tu else
+                     f"{u} / {tot} {tu}", t["disk"]))
+    return rows[:3]
+
+
+def _dash_stats(d, ctx, t):
+    """CPU temp, GPU temp, then GPU fan (RPM or %) or the best ping."""
+    out = [("temp", "CPU Temp", "CPU", fmt_temp(d.get("cpu_temp")).replace("°", "") , "°C", temp_color(t, d.get("cpu_temp"))),
+           ("temp", "GPU Temp", "GPU", fmt_temp(d.get("gpu_temp")).replace("°", ""), "°C",
+            temp_color(t, d.get("gpu_temp"), 75, 87))]
+    rpm, pct = d.get("gpu_fan"), d.get("gpu_fan_pct")
+    if isnum(rpm):
+        out.append(("fan", "GPU Fan", "Fan", f"{rpm:.0f}", "RPM", t["text"]))
+    elif isnum(pct):
+        out.append(("fan", "GPU Fan", "Fan", f"{pct:.0f}", "%", t["text"]))
+    else:
+        lat = [l["ms"] for l in ctx["online"].get("latency") or [] if l.get("ms") is not None]
+        ms = min(lat) if lat else None
+        out.append(("ping", "Ping", None, f"{ms:.0f}" if ms is not None else "--", "ms", ms_color(t, ms)))
+    return out
+
+
+def _dash_net(c, x, y, w, h, kind, label, value, hist_vals, color, bits):
+    t = c.t
+    _icon(c, kind, x + 22, y + 22, 24, color)
+    c.text(x + 40, y + 9 + 5 * draw.TEXT_SCALE, label, "medium", 11, t["sub"], "lm")
+    v, u = fmt_speed(value, bits)
+    vb = y + 17 + 20 * draw.TEXT_SCALE
+    c.value_unit(x + 40, vb, v, u, t["text"], 17, anchor="ls", unit_size=10, max_w=w - 48, role="bold")
+    sh = y + h - vb - 16
+    if sh > 10:
+        _spark(c, x + 10, y + h - sh - 8, w - 20, sh, hist_vals, color)
+
+
+def page_dash(c: Canvas, ctx):
+    d, hist, t = ctx["data"], ctx["hist"], c.t
+    land = c.w > c.h
+    bits = ctx["bits"]
+    header(c, PAGE_TITLES["overview"], ctx)
+    x0, y0, x1, y1 = 8, 34, c.w - 8, c.h - 8
+    c.card(x0, y0, x1 - x0, y1 - y0)
+    cpu_sub = f"{fmt_clock_ghz(d.get('cpu_clock'))} GHz"
+    has_gpu = isnum(d.get("gpu_load"))
+    gpu_sub = f"{fmt_temp(d.get('gpu_temp')).rstrip('°')}°C" if has_gpu else "not detected"
+    rows = _dash_rows(d, t)
+    stats = _dash_stats(d, ctx, t)
+    div = t["border"]
+
+    if land:
+        cw = 150
+        xa, xb, xc = x0, x0 + cw, x0 + 2 * cw
+        wc = x1 - xc
+        ys = 196  # split between the top (gauges) and bottom (network) halves
+        _dash_gauge(c, xa, y0, cw, ys - y0, "CPU", None, d.get("cpu_load"), t["cpu"], cpu_sub, hist.get("cpu_load"))
+        _dash_gauge(c, xb, y0, cw, ys - y0, "GPU", None, d.get("gpu_load"), t["gpu"], gpu_sub, hist.get("gpu_load"))
+        step = (ys - y0 - 16) / 3
+        for i, (kind, label, pct, sub, col) in enumerate(rows):
+            _dash_row(c, xc + 10, y0 + 8 + step * (i + 0.5), wc - 22, kind, label, pct, sub, col)
+        for xx in (xb, xc):
+            c.line(xx, y0 + 12, xx, ys - 6, div)
+            c.line(xx, ys + 6, xx, y1 - 12, div)
+        c.line(x0 + 12, ys, x1 - 12, ys, div)
+        bh = y1 - ys
+        _dash_net(c, xa, ys, cw, bh, "down", "Download", d.get("net_down"), hist.get("net_down"), t["down"], bits)
+        _dash_net(c, xb, ys, cw, bh, "up", "Upload", d.get("net_up"), hist.get("net_up"), t["up"], bits)
+        step = (bh - 12) / 3
+        for i, (kind, label, short, v, u, col) in enumerate(stats):
+            yy = ys + 6 + step * (i + 0.5)
+            _icon(c, kind, xc + 22, yy, 22, t["temp"] if kind == "temp" else t["icon"])
+            vw = c.value_unit(x1 - 12, yy + 6, v, u, col, 16, anchor="rs", unit_size=10, role="bold", max_w=70)
+            _label(c, xc + 40, yy, label, short, "medium", 11.5, t["text"], wc - 60 - vw)
+    else:
+        W = x1 - x0
+        cw = W / 2
+        ya = y0 + 160          # gauges
+        yb = ya + 112          # RAM / VRAM / disk rows
+        yc = yb + 96           # download / upload
+        _dash_gauge(c, x0, y0, cw, ya - y0, "CPU", None, d.get("cpu_load"), t["cpu"], cpu_sub, hist.get("cpu_load"))
+        _dash_gauge(c, x0 + cw, y0, cw, ya - y0, "GPU", None, d.get("gpu_load"), t["gpu"], gpu_sub,
+                    hist.get("gpu_load"))
+        c.line(x0 + cw, y0 + 12, x0 + cw, ya - 6, div)
+        c.line(x0 + 12, ya, x1 - 12, ya, div)
+        step = (yb - ya - 8) / 3
+        for i, (kind, label, pct, sub, col) in enumerate(rows):
+            _dash_row(c, x0 + 10, ya + 4 + step * (i + 0.5), W - 22, kind, label, pct, sub, col)
+        c.line(x0 + 12, yb, x1 - 12, yb, div)
+        _dash_net(c, x0, yb, cw, yc - yb, "down", "Download", d.get("net_down"), hist.get("net_down"), t["down"],
+                  bits)
+        _dash_net(c, x0 + cw, yb, cw, yc - yb, "up", "Upload", d.get("net_up"), hist.get("net_up"), t["up"], bits)
+        c.line(x0 + cw, yb + 6, x0 + cw, yc - 6, div)
+        c.line(x0 + 12, yc, x1 - 12, yc, div)
+        sw = W / 3
+        for i, (kind, label, short, v, u, col) in enumerate(stats):
+            xx = x0 + sw * i
+            cx = xx + sw / 2
+            _icon(c, kind, xx + 20, yc + 22, 22, t["temp"] if kind == "temp" else t["icon"])
+            _label(c, xx + 36, yc + 22, label, short, "medium", 10.5, t["sub"], sw - 42)
+            c.value_unit(cx, y1 - 14, v, u, col, 20, anchor="ms", unit_size=10, role="bold", max_w=sw - 14)
+            if i:
+                c.line(xx, yc + 6, xx, y1 - 10, div)
+
+
 # ---------------------------------------------------------------- pages
 def page_overview(c: Canvas, ctx):
     d, hist, t = ctx["data"], ctx["hist"], c.t
+    if t.get("layout") == "dash":
+        return page_dash(c, ctx)
     land = c.w > c.h
     header(c, PAGE_TITLES["overview"], ctx)
     cpu_l = ("%s" % fmt_temp(d.get("cpu_temp")).rstrip("°"), "°C", temp_color(t, d.get("cpu_temp")))
