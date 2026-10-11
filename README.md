@@ -34,14 +34,16 @@ Both are found automatically (by USB ID or serial number). If yours shows up as 
   - **Network**: download / upload graph, VPN status, public IP + country, HTTP latency to several targets (and your own server, optional), traffic since boot
   - **Storage**: every drive with fill bar, disk read / write, top apps by CPU, uptime
   - **Clock**: big clock, Gregorian + Jalali (Persian) date, weather with a 3-day forecast
-- **7 themes**: Pulse (one-panel dashboard with arc gauges and sparklines), Midnight, Neon (glow), Ember, Frost (light), Aurora and Carbon (textured backgrounds that hide LCD ghosting / burn-in)
+- **8 themes**: HUD (sci-fi frame with ring gauges, one colour per metric), Pulse (one-panel dashboard with arc gauges and sparklines), Midnight, Neon (glow), Ember, Frost (light), Aurora and Carbon (textured backgrounds that hide LCD ghosting / burn-in)
 - **Landscape and portrait**, plus **Flip 180°** and **Mirror** (horizontal / vertical) for screens mounted upside down or seen through glass
+- **Page effects** when the page or theme changes: Fade, Fade + dissolve, Wipe (down / up / right / left), Curtain, Iris, Diagonal, Blinds, Checkerboard, Spiral, Dissolve or Random (see below)
 - **Text size**: normal, large, extra large; values shrink to fit instead of overflowing
 - **Brightness** and **night dimming** (time window)
-- **Fast**: draws one frame a second and sends only the parts that changed
+- **Fast**: draws one frame a second and sends only the parts that changed, plus a full redraw every 60 s (or tray → Full redraw now) to clear anything a partial update missed
 - **Tray icon** for everything (theme, page, rotation, brightness, screen off, restart) and a **Settings window with live preview**: nothing reaches the screen until you press Apply
 - **Real temperatures** through LibreHardwareMonitor (CPU and GPU), with `nvidia-smi` as a fallback for NVIDIA cards
 - **VPN-aware latency**: measured as an HTTP round trip on an open connection, so TUN-mode VPNs (v2rayN, sing-box, Clash…) can't fake a 1 ms ping
+- **Weather that just works**: if the Open-Meteo city search is blocked on your network, the city is looked up with Photon / Nominatim instead
 - **Clear ghost image**: a slow colour cycle at full brightness that helps fade LCD image retention
 - **Starts with Windows** (scheduled task with admin rights, needed for CPU temperatures), no UAC prompt
 
@@ -51,6 +53,7 @@ All 4 pages per theme (rendered by the app itself with sample data):
 
 | Theme | Landscape (480×320) |
 |---|---|
+| HUD | <img src="docs/screenshots/hud-landscape.png" width="100%"> |
 | Pulse | <img src="docs/screenshots/pulse-landscape.png" width="100%"> |
 | Carbon | <img src="docs/screenshots/carbon-landscape.png" width="100%"> |
 | Aurora | <img src="docs/screenshots/aurora-landscape.png" width="100%"> |
@@ -62,6 +65,31 @@ All 4 pages per theme (rendered by the app itself with sample data):
 Portrait (320×480):
 
 <img src="docs/screenshots/neon-portrait.png" width="100%">
+
+### Page effects
+
+<img src="docs/screenshots/effects.gif" alt="Page effects: fade, iris, spiral, dissolve, curtain, blinds, diagonal" width="100%">
+
+Pick one in tray → **Page effect** or **Settings → Display → Page effect** (default: **Fade**). The effect plays when the page or the theme changes; the normal once-a-second updates stay fast.
+
+| Effect | What you see |
+|---|---|
+| Fade | backlight dims to black, the new page is drawn in the dark, then it fades back in (hides the drawing completely) |
+| Fade + dissolve | dims, the new page appears block by block in random order, full brightness again |
+| Wipe down / up / right / left | the new page comes in from one edge |
+| Curtain | opens from the middle to both sides |
+| Iris | grows from the centre outwards |
+| Diagonal | from the top-left corner to the bottom-right |
+| Blinds | all slats open at the same time |
+| Checkerboard | first the "white" squares, then the "black" ones |
+| Spiral | from the edges in to the centre |
+| Dissolve | blocks in random order |
+| Random | a different effect every time |
+| None | plain redraw, top to bottom |
+
+Directions follow Flip 180° and Mirror, so "Wipe down" really starts at the top of the screen as you see it.
+
+**Why no rotate / zoom / slide?** The screen has no graphics chip: every pixel is sent over USB, and a full frame takes about a second. Smooth animations would need 25–30 full frames a second. So the effects are made from the *order* the new frame is sent in, and from the backlight (a 6-byte command), which costs no extra time.
 
 Settings window with live preview:
 
@@ -96,6 +124,8 @@ Settings are saved in `config.yaml` next to `main.py` and reload by themselves w
 | Picture is upside down | Tray → Rotate / Flip → Flip 180° |
 | Text is too small | Tray → Text size → Large or Extra large |
 | Faint old image shows through dark themes | That is LCD retention from the old app: try tray → Clear ghost image, or the Aurora / Carbon themes |
+| Page change looks slow | That is the USB speed (about 1 s per full frame). Fade hides the drawing best; None is the plain redraw |
+| Weather stays empty | Check the city name in Settings → Weather & names; the log (`smartscreen.log`) says which lookup failed |
 | Ping shows < 1 ms with a VPN | Use a URL target (default), not a local address; latency is measured over HTTP for this reason |
 
 ## For developers
@@ -104,17 +134,20 @@ Settings are saved in `config.yaml` next to `main.py` and reload by themselves w
 main.py          app loop, page rotation, night dimming, tray menu
 settings.py      Settings window (tkinter) with live preview
 core/screen.py   partial updates: changed 16-px bands -> RGB565 -> screen
+core/transitions.py  page effects: send order of strips / tiles, backlight fade
 core/pages.py    the 4 pages, landscape + portrait layouts
-core/themes.py   the 7 themes
+core/themes.py   the 8 themes
 core/sensors.py  psutil + LibreHardwareMonitor + nvidia-smi
-core/online.py   latency, public IP / country, weather (open-meteo)
+core/online.py   latency, public IP / country, weather (open-meteo; Photon / Nominatim city search fallback)
 library/lcd/     rev A driver from turing-smart-screen-python
 tools/preview.py renders every theme/page to previews/ without a screen
-tools/test_protocol.py  fake serial port that checks partial updates rebuild the exact frame
+tools/preview_effects.py  renders every page effect as a GIF to previews/effects/
+tools/test_protocol.py  fake serial port that checks partial updates and every effect rebuild the exact frame
 ```
 
 ```
 python tools/preview.py            # or: python tools/preview.py xlarge
+python tools/preview_effects.py
 python tools/test_protocol.py
 ```
 

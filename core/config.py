@@ -19,6 +19,7 @@ DEFAULTS = {
         "flip": False,               # rotate the picture 180 degrees (screen mounted upside down)
         "mirror": "none",            # none | horizontal | vertical
         "text_size": "normal",       # normal | large | xlarge
+        "transition": "fade",        # page-change effect, see core/transitions.EFFECTS
         "full_refresh": 60,          # seconds between full-screen redraws (0 = never); clears leftovers
         "brightness": 60,            # 0-100
         "night_mode": True,          # dim the screen at night

@@ -1,6 +1,7 @@
 """Page layouts. Each page draws for landscape (480x320) or portrait (320x480)."""
 import datetime as dt
 import math
+import re
 import time
 
 from core import draw
@@ -388,11 +389,226 @@ def page_dash(c: Canvas, ctx):
                 c.line(xx, yc + 6, xx, y1 - 10, div)
 
 
+# ---------------------------------------------------------------- "hud" layout (HUD theme)
+def _hud_frame(c):
+    """Crisp sci-fi frame: chamfered panel, top tab for the page dots, bright corner accents, bottom tab."""
+    t = c.t
+    W, H = c.w, c.h
+    S = draw.S
+    line = draw.hex2rgb(t["hud_line"])
+    edge = draw.hex2rgb(t["border"])
+    m, ch = 4, 12  # margin, corner chamfer
+
+    def poly(pts, col, w, fill=None):
+        pts = [(x * S, y * S) for x, y in pts]
+        if fill:
+            c.d.polygon(pts, fill=fill)
+        c.d.line(pts, fill=col, width=int(w * S), joint="curve")
+
+    # panel: chamfered outline (no fill, so the grid texture stays visible)
+    x0, y0, x1, y1 = m, m + 4, W - m, H - m - 4
+    panel = [(x0 + ch, y0), (x1 - ch, y0), (x1, y0 + ch), (x1, y1 - ch), (x1 - ch, y1), (x0 + ch, y1),
+             (x0, y1 - ch), (x0, y0 + ch), (x0 + ch, y0)]
+    poly(panel, edge, 1)
+    # top tab (holds the page dots) and a smaller bottom tab, hanging into the panel
+    for yy, dy, tw in ((y0, 1, 36), (y1, -1, 22)):
+        tab = [(W / 2 - tw - 9, yy), (W / 2 - tw, yy + 10 * dy), (W / 2 + tw, yy + 10 * dy), (W / 2 + tw + 9, yy)]
+        poly(tab, line, 1.5, fill=draw.hex2rgb(t["bg"][1]))
+    for i in range(3):
+        c.d.rectangle(c._r((W / 2 - 11 + i * 9, y1 - 6, W / 2 - 7 + i * 9, y1 - 4)),
+                      fill=draw.hex2rgb(t["hud_hot"] if i == 1 else t["hud_line"]))
+    tw = 36
+    # bright corner accents along the chamfers
+    L = 26
+    for sx, sy in ((1, 1), (-1, 1), (1, -1), (-1, -1)):
+        ox = x0 if sx > 0 else x1
+        oy = y0 if sy > 0 else y1
+        poly([(ox, oy + sy * (ch + L)), (ox, oy + sy * ch), (ox + sx * ch, oy), (ox + sx * (ch + L), oy)], line, 2)
+    # small tick rows next to the top tab, one orange tick like a level meter
+    for side in (-1, 1):
+        xs = W / 2 + side * (tw + 18)
+        for i in range(8):
+            xx = xs + side * i * 5
+            col = draw.hex2rgb(t["hud_hot"]) if i == 5 else edge
+            c.d.rectangle(c._r((xx - 1, y0 + 4, xx + 1, y0 + 8)), fill=col)
+    # side markers at mid height
+    for xx in (x0 + 4, x1 - 6):
+        c.d.rectangle(c._r((xx, H / 2 - 10, xx + 2, H / 2 + 10)), fill=line)
+
+
+def _hud_pill(c, x0, y0, x1, y1, color, label, value, unit=""):
+    """Rounded outline box: label on the left, value + unit on the right."""
+    t = c.t
+    S = draw.S
+    col = draw.hex2rgb(color)
+    c.d.rounded_rectangle(c._r((x0, y0, x1, y1)), 6 * S, fill=draw.mix(t["card"], color, 0.05), outline=col,
+                          width=int(1.5 * S))
+    h = y1 - y0
+    ym = (y0 + y1) / 2
+    lw = 0
+    if label:
+        lw = c.text(x0 + 9, ym, label, "bold", h * 0.44 / draw.TEXT_SCALE, color, "lm") + 6  # fixed box
+    c.value_unit(x1 - 8, ym + h * 0.24, value, unit, t["text"], h * 0.66, anchor="rs", unit_size=h * 0.40,
+                 unit_color=t["text"], max_w=x1 - x0 - 16 - lw)
+
+
+def _hud_gauge(c, cx, cy, r, label, pct, sub=None, color=None):
+    """Ring gauge: dark track, coloured fill; name on top, number in the middle, detail at the bottom."""
+    t = c.t
+    w = max(5, r * 0.14)
+    col = t["bad"] if isnum(pct) and pct >= 95 else color
+    c.ring(cx, cy, r, w, pct, col, track=draw.mix(t["track"], color, 0.22))
+    inner = 2 * (r - w) - 8
+    k = 1 / draw.TEXT_SCALE  # the ring interior is fixed space, so its text does not follow the text-size setting
+    c.text_fit(cx, cy - r * 0.40, label, "black", r * 0.30 * k, t["text"], "mm", max_w=inner * 0.9)
+    big = r * 0.56 * k
+    c.value_unit(cx + 1, cy + big * 0.38, fmt_pct(pct), "%", t["text"], big, anchor="ms", unit_size=big * 0.45,
+                 unit_color=t["text"], max_w=inner, role="monob")
+    if sub:
+        # width of the ring's inside at the height of this line, so long names never touch the ring
+        ri, dy = r - w - 1, r * 0.50 + r * 0.08
+        avail = 2 * math.sqrt(max(0.0, ri * ri - dy * dy))
+        size = max(7 * k, c.fit_size(sub, "bold", r * 0.25 * k, avail))
+        c.text(cx, cy + r * 0.50, sub, "bold", size, t["text"], "mm", max_w=avail)
+
+
+def _hud_values(d, ctx):
+    gb = lambda b: f"{b / 1024 ** 3:.1f}"  # noqa: E731
+    out = {}
+    name = d.get("cpu_name") or ""
+    # model only (i7-12700K, 5800X, 265K) so it fits inside the ring
+    m = re.search(r"\b(i[3579]-\w+)", name) or re.search(r"\b(\w*\d{3,}\w*)\s*$", name)
+    out["cpu_sub"] = m.group(1) if m else name or None
+    ram_u, ram_t = d.get("ram_used"), d.get("ram_total")
+    out["ram_sub"] = f"{gb(ram_u)}/{ram_t / 1024 ** 3:.0f} GB" if isnum(ram_u) and isnum(ram_t) else None
+    used, total = d.get("gpu_mem_used"), d.get("gpu_mem_total")
+    if isnum(used) and isnum(total) and total:
+        out["vram_pct"], out["vram_sub"] = used / total * 100, f"{used / 1024:.1f}/{total / 1024:.0f} GB"
+        out["vram_pill"] = (f"{used / 1024:.1f}/{total / 1024:.0f}", "GB")
+    else:
+        out["vram_pct"], out["vram_sub"], out["vram_pill"] = None, "n/a", ("--", "GB")
+    disks = d.get("disks") or []
+    sysd = next((x for x in disks if x["label"].upper().startswith("C")), disks[0] if disks else None)
+    out["disk_pct"] = sysd["pct"] if sysd else None
+    if sysd:
+        u, uu = fmt_bytes(sysd["used"], 0)
+        tt, tu = fmt_bytes(sysd["total"], 0)
+        out["disk_sub"] = f"{u}/{tt} {tu}" if uu == tu else f"{u} {uu}/{tt} {tu}"
+    else:
+        out["disk_sub"] = None
+    lat = [l["ms"] for l in ctx["online"].get("latency") or [] if l.get("ms") is not None]
+    out["ping"] = f"{min(lat):.0f}" if lat else "--"
+    pw = d.get("cpu_power")
+    out["cpu_pw"] = f"{pw:.0f}" if isnum(pw) else "--"
+    rpm, fp = d.get("gpu_fan"), d.get("gpu_fan_pct")
+    out["fan"] = (f"{rpm:.0f}", "RPM") if isnum(rpm) else (f"{fp:.0f}", "%") if isnum(fp) else ("--", "RPM")
+    return out
+
+
+def _hud_stat(c, x0, y0, x1, y1, color, label, value, unit=""):
+    """Two-line box: small coloured label on top, big value + unit below (never overlap)."""
+    t = c.t
+    S = draw.S
+    c.d.rounded_rectangle(c._r((x0, y0, x1, y1)), 6 * S, fill=draw.mix(t["card"], color, 0.05),
+                          outline=draw.hex2rgb(color), width=int(1.5 * S))
+    k = 1 / draw.TEXT_SCALE  # fixed box, fixed label
+    c.text_fit(x0 + 7, y0 + 9, label, "bold", 8.5 * k, color, "lm", max_w=x1 - x0 - 12)
+    h = y1 - y0
+    c.value_unit(x0 + 7, y1 - 6, value, unit, t["text"], (h - 16) * 0.80 * k, anchor="ls",
+                 unit_size=(h - 16) * 0.42 * k, unit_color=t["text"], max_w=x1 - x0 - 14)
+
+
+def _hud_weather(c, cx, y, max_w, wx):
+    """One centred line: icon, temperature, condition, city."""
+    t = c.t
+    if not wx or "temp" not in wx:
+        msg = (wx or {}).get("error") or "Weather loading…"
+        c.text_fit(cx, y, msg, "medium", 10, t["dim"], "mm", max_w=max_w)
+        return
+    temp = f"{wx['temp']:.0f}{wx['unit']}"
+    rest = f"  {wx['text']} · {wx['city']}"
+    size = c.fit_size(temp + rest, "medium", 11, max_w - 22)
+    wt = c.tlen(temp, "bold", size)
+    total = 22 + wt + c.tlen(rest, "medium", size)
+    x = cx - total / 2
+    c.weather_icon(x + 9, y, 18, wx["icon"], wx.get("is_day", True))
+    c.text(x + 22, y, temp, "bold", size, t["text"], "lm")
+    c.text(x + 22 + wt, y, rest, "medium", size, t["sub"], "lm")
+
+
+def page_hud(c: Canvas, ctx):
+    d, t = ctx["data"], c.t
+    land = c.w > c.h
+    W, H = c.w, c.h
+    bits = ctx["bits"]
+    now = ctx["now"]
+    v = _hud_values(d, ctx)
+    _hud_frame(c)
+    # page dots in the top notch
+    pages, cur = ctx["pages"], ctx["page"]
+    if len(pages) > 1:
+        x0 = W / 2 - (len(pages) - 1) * 6
+        for i, p in enumerate(pages):
+            on_ = p == cur
+            c.dot(x0 + i * 12, 13, 2.6 if on_ else 1.9, t["accent"] if on_ else t["dim"])
+    hm = now.strftime("%H:%M") if ctx["h24"] else now.strftime("%I:%M").lstrip("0")
+    df = ctx.get("date_fmt", "text")
+    ctemp = fmt_temp(d.get("cpu_temp")).rstrip("°")
+    gtemp = fmt_temp(d.get("gpu_temp")).rstrip("°")
+    dv, du = fmt_speed(d.get("net_down"), bits)
+    uv, uu = fmt_speed(d.get("net_up"), bits)
+    fan_v, fan_u = v["fan"]
+    wx = ctx["online"].get("weather")
+    top = [(t["cpu"], "CPU POWER", v["cpu_pw"], "W"),
+           (t["cpu"], "CPU CLOCK", fmt_clock_ghz(d.get("cpu_clock")), "GHz"),
+           (t["ok"], "PING", v["ping"], "ms"),
+           (t["gpu"], "GPU FAN", fan_v, fan_u)]
+
+    if land:
+        for (xa, xb), (col, lab, val, unit) in zip(((16, 118), (124, 236), (244, 356), (362, 464)), top):
+            _hud_stat(c, xa, 22, xb, 60, col, lab, val, unit)
+        _hud_gauge(c, 68, 118, 50, "CPU", d.get("cpu_load"), v["cpu_sub"], t["cpu"])
+        _hud_gauge(c, 412, 118, 50, "GPU", d.get("gpu_load"), d.get("gpu_short"), t["gpu"])
+        # centre: clock, dates, weather
+        c.text_fit(240, 102, hm, "monox", 40, t["clock"], "ms", max_w=150)
+        c.text_fit(240, 118, f"{now.strftime('%a')} · {gregorian_string(now, df)}", "medium", 10.5, t["sub"], "mm",
+                   max_w=210)
+        c.text_fit(240, 133, jalali_string(now, df), "bold", 10.5, t["accent"], "mm", max_w=210)
+        _hud_weather(c, 240, 152, 214, wx)
+        _hud_stat(c, 16, 180, 80, 222, t["temp"], "CPU TEMP", ctemp, "°C")
+        _hud_stat(c, 400, 180, 464, 222, t["temp"], "GPU TEMP", gtemp, "°C")
+        _hud_gauge(c, 134, 218, 48, "RAM", d.get("ram_pct"), v["ram_sub"], t["ram"])
+        _hud_gauge(c, 240, 218, 48, "SSD", v["disk_pct"], v["disk_sub"], t["disk"])
+        _hud_gauge(c, 346, 218, 48, "VRAM", v["vram_pct"], v["vram_sub"], t["vram"])
+        _hud_pill(c, 16, 272, 234, 300, t["up"], "UP", uv, uu)
+        _hud_pill(c, 246, 272, 464, 300, t["down"], "DOWN", dv, du)
+    else:
+        for i, (col, lab, val, unit) in enumerate(top):
+            x = 14 + i * 74
+            _hud_stat(c, x, 22, x + 70, 60, col, lab, val, unit)
+        c.text_fit(W / 2, 104, hm, "monox", 38, t["clock"], "ms", max_w=150)
+        c.text_fit(W / 2, 120, f"{now.strftime('%a')} · {gregorian_string(now, df)}", "medium", 10.5, t["sub"],
+                   "mm", max_w=280)
+        c.text_fit(W / 2, 135, jalali_string(now, df), "bold", 10.5, t["accent"], "mm", max_w=280)
+        _hud_weather(c, W / 2, 154, 284, wx)
+        _hud_gauge(c, 84, 222, 54, "CPU", d.get("cpu_load"), v["cpu_sub"], t["cpu"])
+        _hud_gauge(c, 236, 222, 54, "GPU", d.get("gpu_load"), d.get("gpu_short"), t["gpu"])
+        _hud_pill(c, 16, 284, 156, 308, t["temp"], "CPU", ctemp, "°C")
+        _hud_pill(c, 164, 284, 304, 308, t["temp"], "GPU", gtemp, "°C")
+        _hud_gauge(c, 60, 360, 44, "RAM", d.get("ram_pct"), v["ram_sub"], t["ram"])
+        _hud_gauge(c, 160, 360, 44, "SSD", v["disk_pct"], v["disk_sub"], t["disk"])
+        _hud_gauge(c, 260, 360, 44, "VRAM", v["vram_pct"], v["vram_sub"], t["vram"])
+        _hud_pill(c, 16, 414, 156, 444, t["up"], "UP", uv, uu)
+        _hud_pill(c, 164, 414, 304, 444, t["down"], "DOWN", dv, du)
+
+
 # ---------------------------------------------------------------- pages
 def page_overview(c: Canvas, ctx):
     d, hist, t = ctx["data"], ctx["hist"], c.t
     if t.get("layout") == "dash":
         return page_dash(c, ctx)
+    if t.get("layout") == "hud":
+        return page_hud(c, ctx)
     land = c.w > c.h
     header(c, PAGE_TITLES["overview"], ctx)
     cpu_l = ("%s" % fmt_temp(d.get("cpu_temp")).rstrip("°"), "°C", temp_color(t, d.get("cpu_temp")))

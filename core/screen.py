@@ -4,6 +4,7 @@ import time
 import numpy as np
 from PIL import Image
 
+from core import transitions
 from library.log import logger
 
 ORIENT = {"portrait": 0, "reverse_portrait": 1, "landscape": 2, "reverse_landscape": 3}
@@ -120,7 +121,51 @@ class Screen:
         if on:
             self.prev = None
 
-    def show(self, img: Image.Image):
+    FADE_STEPS = 6       # backlight steps each way for the fade effects
+    FADE_STEP_S = 0.04
+
+    def _fade(self, down):
+        top = self.brightness or 0
+        levels = [round(top * i / self.FADE_STEPS) for i in range(self.FADE_STEPS)]  # 0 .. < top
+        for lv in (reversed(levels) if down else levels[1:] + [top]):
+            self.lcd.SetBrightness(int(lv))
+            time.sleep(self.FADE_STEP_S)
+
+    def show(self, img: Image.Image, effect="none", fx=False, fy=False):
+        """Send a frame. effect (core.transitions) is used for page changes; fx/fy = picture mirrored on x/y."""
+        effect = transitions.pick(effect)
+        if effect != "none":
+            return self._show_effect(img, effect, fx, fy)
+        return self._show_plain(img)
+
+    def _show_effect(self, img, effect, fx, fy):
+        cur = to565(img)
+        h, w = cur.shape
+        fade = effect in ("fade", "fade_dissolve")
+        if fade and self.brightness:
+            self._fade(down=True)
+        if effect == "fade":
+            self.prev = None  # full frame while dark
+            res = self._show_plain(img)
+        else:
+            prev = self.prev if self.prev is not None and self.prev.shape == cur.shape else None
+            n = area = 0
+            for x0, y0, x1, y1 in transitions.order(effect, w, h, fx, fy):
+                if prev is not None and np.array_equal(prev[y0:y1 + 1, x0:x1 + 1], cur[y0:y1 + 1, x0:x1 + 1]):
+                    continue
+                self.lcd.DisplayPILImage(img.crop((x0, y0, x1 + 1, y1 + 1)), x0, y0)
+                n += 1
+                area += (x1 - x0 + 1) * (y1 - y0 + 1)
+            self.prev = cur
+            if prev is None:
+                self.last_full = time.time()
+            res = n, area
+        if fade and self.brightness:
+            time.sleep(0.05)
+            self._fade(down=False)
+        return res
+
+    def _show_plain(self, img: Image.Image):
         cur = to565(img)
         h, w = cur.shape
         due = self.full_every and time.time() - self.last_full >= self.full_every
@@ -168,7 +213,7 @@ class PreviewScreen(Screen):
     def power(self, on):
         self.is_on = on
 
-    def show(self, img):
+    def show(self, img, effect="none", fx=False, fy=False):
         cur = to565(img)
         rects = [] if self.prev is None or self.prev.shape != cur.shape else changed_rects(self.prev, cur)
         self.prev = cur

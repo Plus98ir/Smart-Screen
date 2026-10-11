@@ -98,6 +98,23 @@ def _textured_bg(theme, w, h):
         # diagonal sheen
         sheen = Image.linear_gradient("L").rotate(35, expand=True).resize((W, H)).point(lambda v: int(v * 0.12))
         img = ImageChops.add(img, Image.merge("RGB", (sheen, sheen, sheen)))
+    elif deco == "hud":
+        # faint grid + blue light coming in from the left and right edges
+        d = ImageDraw.Draw(img)
+        gc = hex2rgb(theme["grid"])
+        step = 16 * S
+        for x in range(step, W, step):
+            d.line([(x, 0), (x, H)], fill=gc, width=1)
+        for y in range(step, H, step):
+            d.line([(0, y), (W, y)], fill=gc, width=1)
+        layer = Image.new("RGB", (W, H), (0, 0, 0))
+        ld = ImageDraw.Draw(layer)
+        glow = hex2rgb(theme["hud_glow"])
+        r = min(W, H) * 0.42
+        for cx, cy in ((0, H * 0.45), (W, H * 0.45)):
+            ld.ellipse((cx - r, cy - r, cx + r, cy + r), fill=glow)
+        layer = layer.filter(ImageFilter.GaussianBlur(r * 0.5))
+        img = ImageChops.add(img, layer)
     _bg_cache[key] = img
     return img.copy()
 
@@ -116,7 +133,7 @@ class Canvas:
 
     # ------------------------------------------------------------- base
     def _background(self):
-        if self.t.get("deco") in ("aurora", "carbon"):
+        if self.t.get("deco") in ("aurora", "carbon", "hud"):
             self.img.paste(_textured_bg(self.t, self.w, self.h))
             return
         top, bottom = hex2rgb(self.t["bg"][0]), hex2rgb(self.t["bg"][1])

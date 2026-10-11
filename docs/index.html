@@ -27,6 +27,9 @@ code{font-family:"JetBrains Mono",monospace;font-size:.88em;background:#1d222b;b
 .wrap{max-width:1680px;margin:0 auto;padding:0 clamp(16px,3vw,48px)}
 img{max-width:100%;display:block}
 
+.fx-title{margin:40px 0 10px;font-size:1.25rem}
+.fx{display:flex;justify-content:center}
+.fx img{width:100%;max-width:768px;height:auto;border-radius:14px;border:1px solid var(--line);image-rendering:auto}
 /* language: only one is visible */
 html[lang=en] [lang=fa], html[lang=fa] [lang=en]{display:none !important}
 
@@ -95,9 +98,8 @@ section .sub{color:var(--muted);margin:0 0 28px;max-width:900px}
 .shot.portrait img{min-width:700px}
 .shot-note{color:var(--muted);font-size:.85rem;margin-top:10px}
 .themes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:28px}
-.themes figure:first-child{grid-column:span 2}  /* 7 themes: newest one wide, so rows stay full */
 @media (max-width:850px){.themes{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:560px){.themes{grid-template-columns:1fr}.themes figure:first-child{grid-column:auto}}
+@media (max-width:560px){.themes{grid-template-columns:1fr}}
 .themes figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;cursor:pointer;transition:border-color .2s}
 .themes figure:hover,.themes figure.on{border-color:var(--accent)}
 .themes img{border-radius:6px;width:100%}
@@ -150,8 +152,8 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-bet
     <div>
       <h1 lang="en">Your 3.5" USB screen, <span>finally good-looking.</span></h1>
       <h1 lang="fa">نمایشگر ۳٫۵ اینچی USB شما، <span>بالاخره زیبا.</span></h1>
-      <p class="lead" lang="en">Smart-Screen replaces the vendor <b>UsbMonitor</b> app of 3.5" USB system-monitor screens (Turing Smart Screen rev A and its clones). CPU, GPU, RAM, temperatures, network, VPN, drives, clock with Jalali date and weather, in 7 themes, landscape or portrait.</p>
-      <p class="lead" lang="fa">Smart-Screen جایگزین برنامهٔ <b>UsbMonitor</b> سازندهٔ نمایشگرهای ۳٫۵ اینچی USB مانیتورینگ سیستم است (Turing Smart Screen نسخهٔ rev A و مشابه‌ها). CPU، کارت گرافیک، رم، دما، شبکه، VPN، درایوها، ساعت با تاریخ شمسی و آب‌وهوا؛ در ۷ تم، افقی یا عمودی.</p>
+      <p class="lead" lang="en">Smart-Screen replaces the vendor <b>UsbMonitor</b> app of 3.5" USB system-monitor screens (Turing Smart Screen rev A and its clones). CPU, GPU, RAM, temperatures, network, VPN, drives, clock with Jalali date and weather, in 8 themes with 13 page effects, landscape or portrait.</p>
+      <p class="lead" lang="fa">Smart-Screen جایگزین برنامهٔ <b>UsbMonitor</b> سازندهٔ نمایشگرهای ۳٫۵ اینچی USB مانیتورینگ سیستم است (Turing Smart Screen نسخهٔ rev A و مشابه‌ها). CPU، کارت گرافیک، رم، دما، شبکه، VPN، درایوها، ساعت با تاریخ شمسی و آب‌وهوا؛ در ۸ تم با ۱۳ افکت عوض شدن صفحه، افقی یا عمودی.</p>
       <div class="btns">
         <a class="btn primary" href="https://github.com/Plus98ir/Smart-Screen/archive/refs/heads/main.zip">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
@@ -244,9 +246,9 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-bet
         <p lang="en">Big clock, Gregorian and Jalali (Persian) date as text or numbers, weather with a 3-day forecast (Open-Meteo, no API key).</p>
         <p lang="fa">ساعت بزرگ، تاریخ میلادی و شمسی به‌صورت متن یا عدد، آب‌وهوا با پیش‌بینی ۳ روزه (Open-Meteo، بدون کلید API).</p></div>
       <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 000 18z" fill="currentColor"/></svg></div>
-        <h3 lang="en">7 themes</h3><h3 lang="fa">۷ تم</h3>
-        <p lang="en">Pulse (one-panel dashboard), Midnight, Neon (glow), Ember, Frost (light), plus Aurora and Carbon with textured backgrounds that hide LCD ghosting.</p>
-        <p lang="fa">Pulse (داشبورد یک‌تکه)، Midnight، Neon (درخشان)، Ember، Frost (روشن)، و Aurora و Carbon با پس‌زمینهٔ بافت‌دار که سایهٔ تصویر ماندگار LCD را می‌پوشانند.</p></div>
+        <h3 lang="en">8 themes</h3><h3 lang="fa">۸ تم</h3>
+        <p lang="en">HUD (sci-fi ring gauges), Pulse (one-panel dashboard), Midnight, Neon (glow), Ember, Frost (light), plus Aurora and Carbon with textured backgrounds that hide LCD ghosting.</p>
+        <p lang="fa">HUD (گیج‌های حلقه‌ای علمی‌تخیلی)، Pulse (داشبورد یک‌تکه)، Midnight، Neon (درخشان)، Ember، Frost (روشن)، و Aurora و Carbon با پس‌زمینهٔ بافت‌دار که سایهٔ تصویر ماندگار LCD را می‌پوشانند.</p></div>
       <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
         <h3 lang="en">Rotate, flip, mirror</h3><h3 lang="fa">چرخش، وارونه، آینه</h3>
         <p lang="en">Landscape or portrait, Flip 180° for screens mounted upside down, horizontal / vertical mirror for screens seen through glass.</p>
@@ -260,9 +262,9 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-bet
         <p lang="en">Set brightness, dim automatically between two times, or turn the screen off from the tray.</p>
         <p lang="fa">تنظیم روشنایی، کم‌نور شدن خودکار بین دو ساعت، یا خاموش کردن نمایشگر از منوی آیکون.</p></div>
       <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></div>
-        <h3 lang="en">Fast partial updates</h3><h3 lang="fa">به‌روزرسانی سریع و جزئی</h3>
-        <p lang="en">One frame per second, only the changed parts are sent over USB, plus a periodic full redraw to keep it clean.</p>
-        <p lang="fa">هر ثانیه یک فریم؛ فقط بخش‌های تغییرکرده از USB فرستاده می‌شوند، با بازکشی کامل دوره‌ای برای تمیز ماندن تصویر.</p></div>
+        <h3 lang="en">Fast updates + page effects</h3><h3 lang="fa">به‌روزرسانی سریع و افکت صفحه</h3>
+        <p lang="en">One frame per second, only the changed parts are sent over USB, plus a periodic full redraw. Page changes with Fade, Iris, Spiral, Dissolve and 9 more effects.</p>
+        <p lang="fa">هر ثانیه یک فریم؛ فقط بخش‌های تغییرکرده از USB فرستاده می‌شوند، با بازکشی کامل دوره‌ای. عوض شدن صفحه با Fade، Iris، Spiral، Dissolve و ۹ افکت دیگر.</p></div>
       <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.8V4a2 2 0 10-4 0v10.8a4 4 0 104 0z"/></svg></div>
         <h3 lang="en">Real temperatures</h3><h3 lang="fa">دمای واقعی</h3>
         <p lang="en">LibreHardwareMonitor for CPU and GPU (Intel and AMD), with nvidia-smi as a fallback for NVIDIA cards.</p>
@@ -292,6 +294,11 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-bet
     <div class="shot-note" lang="en">Pages: System · Network · Storage · Clock. Scroll sideways on small screens.</div>
     <div class="shot-note" lang="fa">صفحه‌ها: System · Network · Storage · Clock. در صفحه‌های کوچک به پهلو اسکرول کنید.</div>
     <div class="themes" id="themes"></div>
+    <h3 class="fx-title" lang="en">Page effects</h3>
+    <h3 class="fx-title" lang="fa">افکت عوض شدن صفحه</h3>
+    <p class="sub" lang="en">Tray → <b>Page effect</b> or Settings → Display. Default is Fade: the backlight dims, the new page is drawn in the dark and fades in. The screen has no graphics chip (about 1 s per full frame over USB), so rotate / zoom / slide are not possible; these effects come from the order the frame is sent in.</p>
+    <p class="sub" lang="fa">منوی آیکون ← <b>Page effect</b> یا Settings → Display. پیش‌فرض Fade است: نور کم می‌شود، صفحهٔ جدید در تاریکی کشیده می‌شود و آرام روشن می‌شود. نمایشگر چیپ گرافیکی ندارد (حدود ۱ ثانیه برای هر فریم کامل از USB)، پس چرخش / زوم / اسلاید ممکن نیست؛ این افکت‌ها از ترتیب ارسال فریم ساخته شده‌اند.</p>
+    <div class="fx"><img src="screenshots/effects.gif" alt="Page effects demo: fade, iris, spiral, dissolve, curtain, blinds, diagonal" loading="lazy" width="384" height="256"></div>
   </section>
 
   <!-- ======================= INSTALL ======================= -->
@@ -365,6 +372,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-bet
 <script>
 (function () {
   var THEMES = [
+    ["hud", "HUD", {en: "ring gauges", fa: "گیج حلقه‌ای"}],
     ["pulse", "Pulse", {en: "dashboard", fa: "داشبورد"}],
     ["carbon", "Carbon", {en: "hides ghosting", fa: "پوشاندن سایه"}],
     ["aurora", "Aurora", {en: "hides ghosting", fa: "پوشاندن سایه"}],

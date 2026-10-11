@@ -113,4 +113,30 @@ scr.show(img)
 m = np.array_equal(fake.fb, to565(img))
 ok &= m
 print("portrait match:", m, fake.cmds[-3:])
+# page-change effects: every effect must rebuild the exact frame (also mirrored / flipped)
+from core.transitions import EFFECTS, order  # noqa: E402
+scr.set_orientation("landscape")
+pages = ["overview", "network", "storage", "clock"]
+for i, eff in enumerate(EFFECTS):
+    for fx, fy in ((False, False), (True, True), (True, False)):
+        fake.bytes, fake.cmds = 0, []
+        img = render(pages[i % 4], THEMES[["midnight", "neon", "ember", "frost"][(i + 1) % 4]], (480, 320), ctx)
+        n, area = scr.show(img, eff, fx, fy)
+        m = np.array_equal(fake.fb, to565(img))
+        ok &= m
+        bright = sum(c.startswith("CMD 110") for c in fake.cmds)
+        if (fx, fy) == (False, False):
+            print(f"effect {eff:13s} rects={n:3d} px={area:6d} bytes={fake.bytes:7d} brightness_cmds={bright:2d}"
+                  f" match={m}")
+        elif not m:
+            print(f"effect {eff} fx={fx} fy={fy} MISMATCH")
+# every rect list must tile the frame exactly once
+for eff in EFFECTS:
+    for size in ((480, 320), (320, 480)):
+        cover = np.zeros(size[::-1], dtype=int)
+        for x0, y0, x1, y1 in order(eff, *size, True, False):
+            cover[y0:y1 + 1, x0:x1 + 1] += 1
+        if not (cover == 1).all():
+            ok = False
+            print("bad tiling:", eff, size)
 print("ALL OK" if ok else "MISMATCH")

@@ -26,6 +26,7 @@ from core.screen import Screen, PreviewScreen, size_for  # noqa: E402
 from core.sensors import Stats  # noqa: E402
 from core.themes import THEMES, get_theme  # noqa: E402
 from core.draw import set_text_size, TEXT_SIZES  # noqa: E402
+from core.transitions import EFFECTS, EFFECT_NAMES  # noqa: E402
 from PIL import Image  # noqa: E402
 
 LOCK_PORT = 47815
@@ -72,6 +73,7 @@ class App:
         self.icon = None
         self.restart_requested = False
         self.wipe_until = 0.0
+        self.last_scene = None  # (page, theme) of the last frame; a change plays the transition effect
 
     # ------------------------------------------------------------ state helpers
     def enabled_pages(self):
@@ -161,16 +163,22 @@ class App:
                        "bits": self.cfg.get("network", "speed_unit") == "bits",
                        "date_fmt": self.cfg.get("date_format", default="text")}
                 set_text_size(self.cfg.get("display", "text_size", default="normal"))
-                img = render_view(page, get_theme(self.cfg.get("theme", default="midnight")), orientation, flip,
-                                  mirror, ctx)
+                theme = self.cfg.get("theme", default="midnight")
+                img = render_view(page, get_theme(theme), orientation, flip, mirror, ctx)
                 self.screen.full_every = int(self.cfg.get("display", "full_refresh", default=60) or 0)
-                self.screen.show(img)
+                scene = (page, theme)
+                effect = "none"
+                if self.last_scene is not None and scene != self.last_scene:
+                    effect = self.cfg.get("display", "transition", default="fade")
+                self.last_scene = scene
+                self.screen.show(img, effect, fx=flip != (mirror == "horizontal"), fy=flip != (mirror == "vertical"))
             except Exception as e:
                 fails += 1
                 self.status = "Screen not found — retrying" if isinstance(e, ConnectionError) else f"Error: {e}"
                 logger.warning("Display error (%s): %s", type(e).__name__, e)
                 self.notify()
                 self.screen.close()
+                self.last_scene = None
                 self.stop_evt.wait(min(30, 3 * fails))
                 continue
             # wake up just after the next full second, so the clock ticks evenly
@@ -256,6 +264,9 @@ class App:
                            Item("Dim at night", toggle("display", "night_mode"),
                                 checked=lambda i: bool(cfg.get("display", "night_mode"))))
 
+        effect_menu = Menu(*[Item(EFFECT_NAMES[e], setter("display", "transition", value=e),
+                                  checked=is_("display", "transition", value=e), radio=True) for e in EFFECTS])
+
         def open_settings(icon, item):
             exe = sys.executable
             if exe.lower().endswith("python.exe"):
@@ -278,6 +289,7 @@ class App:
             Item("Page", page_menu),
             Item("Rotate / Flip", orient_menu),
             Item("Text size", size_menu),
+            Item("Page effect", effect_menu),
             Item("Date format", date_menu),
             Item("Brightness", bright_menu),
             Item("Full redraw now", lambda icon, item: setattr(self.screen, "prev", None)),

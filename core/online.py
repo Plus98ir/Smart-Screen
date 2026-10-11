@@ -38,6 +38,47 @@ def _get_text(url, timeout=8):
         return r.read().decode("utf-8", "replace")
 
 
+def _geocode(city):
+    """City name -> (lat, lon, name, country code), or None if no service knows it.
+    Tries open-meteo first, then two OpenStreetMap services, because some networks block one of them."""
+    q = urllib.parse.quote(city)
+    errors = []
+
+    def open_meteo():
+        g = _get_json(f"https://geocoding-api.open-meteo.com/v1/search?name={q}&count=1&format=json", timeout=6)
+        r = (g.get("results") or [None])[0]
+        return r and (r["latitude"], r["longitude"], r.get("name", city), r.get("country_code", ""))
+
+    def photon():
+        g = _get_json(f"https://photon.komoot.io/api/?q={q}&limit=1&lang=en", timeout=6)
+        f = (g.get("features") or [None])[0]
+        if not f:
+            return None
+        lon, lat = f["geometry"]["coordinates"][:2]
+        return lat, lon, f["properties"].get("name", city), f["properties"].get("countrycode", "")
+
+    def nominatim():
+        g = _get_json(f"https://nominatim.openstreetmap.org/search?q={q}&format=json&limit=1&addressdetails=1"
+                      "&accept-language=en", timeout=6)
+        r = (g or [None])[0]
+        return r and (float(r["lat"]), float(r["lon"]), r.get("name") or city,
+                      (r.get("address") or {}).get("country_code", "").upper())
+
+    for name, fn in (("open-meteo", open_meteo), ("photon", photon), ("nominatim", nominatim)):
+        try:
+            res = fn()
+        except Exception as e:
+            errors.append(f"{name}: {e}")
+            continue
+        if res:
+            if errors:
+                logger.info("Weather: city found via %s (%s)", name, "; ".join(errors))
+            return res
+    if len(errors) == 3:
+        raise OSError("all city lookup services failed: " + "; ".join(errors))
+    return None
+
+
 def http_rtt(url: str, timeout=5.0) -> float:
     """Round-trip time of one HTTP request on an already-open connection (ms).
     Works through TUN-mode VPNs, where ICMP ping is answered locally and is meaningless."""
@@ -127,14 +168,12 @@ class Online:
             self._set(weather=None)
             return
         if not self._geo or self._geo[0] != city:
-            q = urllib.parse.quote(city)
-            g = _get_json(f"https://geocoding-api.open-meteo.com/v1/search?name={q}&count=1&format=json")
-            if not g.get("results"):
+            geo = _geocode(city)
+            if not geo:
                 logger.warning("Weather: city '%s' not found", city)
                 self._set(weather={"error": f"City not found: {city}"})
                 return
-            r = g["results"][0]
-            self._geo = (city, r["latitude"], r["longitude"], r.get("name", city), r.get("country_code", ""))
+            self._geo = (city,) + geo
         _, lat, lon, label, cc = self._geo
         imperial = self.cfg.get("weather", "units") == "imperial"
         units = "&temperature_unit=fahrenheit&wind_speed_unit=mph" if imperial else ""

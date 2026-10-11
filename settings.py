@@ -20,6 +20,7 @@ from core.config import Config, PAGES, ORIENTATIONS, MIRRORS  # noqa: E402
 from core.pages import render_view  # noqa: E402
 from core.pages import PAGE_TITLES  # noqa: E402
 from core.themes import THEMES  # noqa: E402
+from core.transitions import EFFECTS  # noqa: E402
 
 
 def com_ports():
@@ -70,6 +71,8 @@ class SettingsWindow:
         self._entry(f, 8, "Night from (HH:MM)", ("display", "night_start"), width=8)
         self._entry(f, 9, "Night until (HH:MM)", ("display", "night_end"), width=8)
         self._check(f, 10, "24-hour clock", ("clock_24h",))
+        self._combo(f, 14, "Page effect", ("display", "transition"), EFFECTS,
+                    "plays when the page or theme changes; fade = backlight", readonly=True)
         self._combo(f, 13, "Date format", ("date_format",), ["text", "numeric", "both"],
                     "text = 16 Mehr 1405, numeric = 1405/07/16", readonly=True)
 

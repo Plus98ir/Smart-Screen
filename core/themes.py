@@ -93,6 +93,21 @@ THEMES = {
         "style": "soft", "radius": 14, "title_font": "bold", "fill_alpha": 0.45,
         "layout": "dash",
     },
+    # sci-fi HUD frame, magenta/blue ring gauges and coloured pills (after the vendor "sadeq2" theme; "layout": "hud")
+    "hud": {
+        "name": "HUD",
+        "bg": ("#0A0E1A", "#05070D"),
+        "deco": "hud", "grid": "#0E1424", "hud_line": "#60A5FA", "hud_glow": "#0A1834", "hud_hot": "#FB923C",
+        "card": "#111827", "border": "#273450", "track": "#1E2840", "gridline": "#1A2236",
+        "text": "#FFFFFF", "sub": "#FFFFFF", "dim": "#8A98B5",
+        "cpu": "#22D3EE", "gpu": "#F472B6", "ram": "#A3E635", "disk": "#FBBF24", "vram": "#A78BFA",
+        "temp": "#FB923C", "down": "#38BDF8", "up": "#F472B6",
+        "ok": "#34D399", "warn": "#FBBF24", "bad": "#F87171",
+        "sun": "#FBBF24", "cloud": "#E2E8F0", "rain": "#60A5FA",
+        "accent": "#60A5FA", "clock": "#FFFFFF",
+        "style": "cut", "title_font": "bold", "label_spacing": 1.4, "fill_alpha": 0.25,
+        "layout": "hud",
+    },
 }
 
 
