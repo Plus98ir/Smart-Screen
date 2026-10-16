@@ -6,6 +6,8 @@
 
 English · [فارسی](README.fa.md) · [Website](https://plus98ir.github.io/Smart-Screen/)
 
+<a href="https://hits.sh/github.com/Plus98ir/Smart-Screen/"><img src="https://hits.sh/github.com/Plus98ir/Smart-Screen.svg?style=for-the-badge&label=views&color=2563eb" alt="Views"></a>
+
 <img src="docs/screenshots/carbon-landscape.png" alt="Smart-Screen, Carbon theme, landscape" width="100%">
 
 </div>
