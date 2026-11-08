@@ -8,6 +8,21 @@ English · [فارسی](README.fa.md) · [Website](https://plus98ir.github.io/Sm
 
 <a href="https://hits.sh/github.com/Plus98ir/Smart-Screen/"><img src="https://hits.sh/github.com/Plus98ir/Smart-Screen.svg?style=for-the-badge&label=views&color=2563eb" alt="Views"></a> <a href="https://corenetbase.com/#support"><img src="https://img.shields.io/badge/support-buy%20me%20a%20coffee-e11d2a?style=for-the-badge&logo=buymeacoffee&logoColor=white" alt="Support"></a>
 
+<details>
+<summary><b>☕ Support · حمایت</b> — USDT (TRC20) / TRX</summary>
+<br>
+<p align="center"><img src="https://raw.githubusercontent.com/Plus98ir/.github/main/tron-qr.png" width="200" alt="TRON address QR"></p>
+
+```
+TA53aFyGNfSAcrCaJi9QmA9x5W47nPJcf7
+```
+
+> [!WARNING]
+> **TRON network only.** Sending from ERC20 / BEP20 will lose the funds.<br>
+> **فقط شبکه‌ی TRON.** ارسال از ERC20 یا BEP20 پول را از بین می‌برد.
+
+</details>
+
 <img src="docs/screenshots/carbon-landscape.png" alt="Smart-Screen, Carbon theme, landscape" width="100%">
 
 </div>
