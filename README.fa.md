@@ -6,7 +6,11 @@
 
 **جایگزین مدرن برنامهٔ «UsbMonitor» برای نمایشگرهای ۳٫۵ اینچی USB مانیتورینگ سیستم (Turing Smart Screen نسخهٔ rev A و مشابه‌ها).**
 
-[English](README.md) · فارسی · [وب‌سایت](https://plus98ir.github.io/Smart-Screen/)
+<div align="center">
+<table><tr><td><a href="https://github.com/Plus98ir/Smart-Screen/blob/main/README.md">🇺🇸 English</a></td><td><b>🇮🇷 فارسی</b></td></tr></table>
+</div>
+
+[وب‌سایت](https://plus98ir.github.io/Smart-Screen/)
 
 <img src="docs/screenshots/carbon-landscape.png" alt="Smart-Screen با تم Carbon" width="100%">
 
