@@ -12,6 +12,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Vazirmatn:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
+:root{--gutter:max(50px,3vw)}@media (max-width:640px){:root{--gutter:16px}}
+
 :root{
   --bg:#0b0d11;--bg2:#12151b;--card:#161a21;--line:#252b35;--text:#e8ecf2;--muted:#9aa4b2;
   --accent:#ff8a3d;--accent2:#45c4ff;--good:#8be04e;--radius:16px;
@@ -24,7 +26,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);lin
 a{color:var(--accent2);text-decoration:none}
 a:hover{text-decoration:underline}
 code{font-family:"JetBrains Mono",monospace;font-size:.88em;background:#1d222b;border:1px solid var(--line);padding:.1em .4em;border-radius:6px;direction:ltr;unicode-bidi:embed}
-.wrap{width:100%;margin:0 auto;padding:0 clamp(16px,4vw,32px)}
+.wrap{width:100%;margin:0 auto;padding:0 var(--gutter)}
 img{max-width:100%;display:block}
 
 .fx-title{margin:40px 0 10px;font-size:1.25rem}
